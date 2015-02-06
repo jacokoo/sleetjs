@@ -13,7 +13,6 @@ exports.Tag = class Tag
         @content = ''
         @name = options.name
         @indent = options.indent
-        @haveAttributes = false
 
         @setId(options.id) if options.id
         @setClass(options.clazz) if options.clazz.length > 0
@@ -27,7 +26,6 @@ exports.Tag = class Tag
         @setAttribute 'class', if Array.isArray(clazz) then clazz.join(' ') else clazz
 
     setAttribute: (name, value) ->
-        @haveAttributes = true
         if name is 'clazz' or name is 'class'
             if @attributes['class']
                 @attributes['class'] += ' ' + value
@@ -40,9 +38,9 @@ exports.Tag = class Tag
         @content += text
 
     generateAttributes: (result) ->
-        return unless @haveAttributes
-        result.push ' '
-        result.push if value is null then key else "#{key}=\"#{value}\"" for key, value of @attributes
+        for key, value of @attributes
+            result.push ' '
+            result.push if value is null then key else "#{key}=\"#{value}\""
 
     generateContent: (result) ->
         children = []

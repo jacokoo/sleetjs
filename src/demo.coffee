@@ -4,11 +4,9 @@ html = """
 a.id
   b#a
   c abc
-  d
-  d.
-    fjdksla
-    fds
-    aa
+  d(a="a", b="b").
+    var demo = []
+    demo.push('a')
 """
 
 console.log(compile html)
