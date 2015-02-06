@@ -1,0 +1,11 @@
+{
+  "name": "sleetjs",
+  "version": "0.0.0",
+  "description": "Sleetjs is little language that compiles into HTML",
+  "main": "index.js",
+  "author": "Jaco Koo <jaco.koo@guyong.in>",
+  "license": "MIT",
+  "devDependencies": {
+    "pegjs": "^0.8.0"
+  }
+}
