@@ -1,0 +1,2 @@
+#!/usr/bin/env node
+require('../src/compiler').cli(process.argv);
