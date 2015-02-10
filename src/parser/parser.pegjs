@@ -42,7 +42,7 @@ tag_child
 tag_def
     = tag_indent? name: identifier? clazz: tag_class* id: tag_id? clazz2: tag_class* & {
         return name || clazz.length > 0 || id || clazz2.length > 0
-    } attrs: tag_attrs? text: tag_text? {
+    } attrs: tag_attrs? text: (_+ t: tag_text { return t; })? {
         return { name: name, indent: IDT, clazz: clazz.concat(clazz2), id: id, attrs: attrs, text: text };
     }
     
@@ -73,37 +73,37 @@ tag_sep
 // tag attribute start //
 /////////////////////////
 tag_attrs
-    = _* '(' attrs:(tag_attrs_inline / tag_attrs_lines) {
+    = _* '(' attrs:(tag_attrs_inline / tag_attrs_lines) _* ')'{
         var result = {}, i;
-        for (i = 0; i < attrs.length; i ++) result[attrs[i].name] = attrs[i].value;
+        for (i = 0; i < attrs.length; i ++) if(attrs[i]) result[attrs[i].name] = attrs[i].value;
         return result;
     }
     
-tag_attrs_inline
-    = _* first: taid rest: (tais a: taid { return a;})* _* ')' {
-        return rest.unshift(first) && rest;
-    }
-
 tag_attrs_lines
-    = _* eol first: tal rest: (eol l: tal { return l; })* tale {
+    = _* eol first: tal rest: (eol l: tal { return l; })* {
         return rest.unshift(first) && rest;
     }
 
 tal "Tag attribute line"
     = indent: tali & {
         return indent === IDT + 1
-    } name: identifier value: (_* '=' _* str: (quoted_string / text_to_end) {return str;}) {
+    } name: identifier value: (_* '=' _* str: (quoted_string / text_to_end) {return str;})? tale? {
         return { name: name, value: value };
     }
+    / tale
     
 tale "Tag attribute line end"
-    = eol (indent: taid & {
-        return indent === IDT;
-    })? ')'
-    
-tali "Tag attribute line indent"
-    = indent: idt {
-        return indent;
+    = indent: tali? & {
+        if (indent === IDT) return true;
+        return false;
+    }
+    / ws:_* & {
+        return IDT === 0 && ws.length === 0;
+    }
+
+tag_attrs_inline
+    = _* first: taid rest: (tais a: taid { return a;})* {
+        return rest.unshift(first) && rest;
     }
 
 taid "Inline tag attribute definition"
@@ -113,6 +113,11 @@ taid "Inline tag attribute definition"
 
 tais "Inline tag attribute seperator"
     = _* ','? _*
+    
+tali "Tag attribute line indent"
+    = indent: idt {
+        return indent;
+    }
 ///////////////////////
 // tag attribute end //
 ///////////////////////
