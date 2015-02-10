@@ -43,15 +43,16 @@ exports.Tag = class Tag
             result.push if value is null then key else "#{key}=\"#{value}\""
 
     generateContent: (result) ->
-        children = []
+        result.push @content
+        haveContent = !! @content
         for item in @options.children
             if isString(item)
-                @appendContent item
+                result.push '\\n' if haveContent
+                result.push item
+                haveContent = true
             else
-                children.push Tag.create(item, @).getOutput()
-
-        result.push @content
-        result.push item for item in children
+                result.push Tag.create(item, @).getOutput()
+                haveContent = true
 
     generateOpen: (result) ->
         result.push '<'

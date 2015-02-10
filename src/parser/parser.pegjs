@@ -203,7 +203,7 @@ pi "Pipeline indent"
 //////////////////
 
 ///////////////////////
-// basic roles start //
+// basic rules start //
 ///////////////////////
 blank_line "Blank line"
     = _* eol
@@ -257,5 +257,5 @@ ec "Escaped char"
     / 'b' { return '\x0B' }
     
 /////////////////////
-// basic roles end //
+// basic rules end //
 /////////////////////
