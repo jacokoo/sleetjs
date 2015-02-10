@@ -1,154 +1,237 @@
 {
-    var parents = [],
-        IDT = 0,
-        getParent = function() {return parents[parents.length - 1];};
+  var IDT = 0,
+      IDT_TOK = null,
+      parents = [],
+      parent = function() {return parents[parents.length - 1];};
 }
 
-
 start
-    = blank_line* tags:tags blank_line* {
+    = blank_line* tags: tags blank_line* _* {
         return tags;
     }
 
+//////////////////////
+// tag itself start //
+//////////////////////
 tags
-    = first:tag next:(tag_seperator tag:tag {return tag})* {
-        return next.unshift(first) && next;
+    = start: tag rest: (tag_sep tag: tag { return tag; }) * {
+        return rest.unshift(start) && rest;
     }
 
 tag
-    = parent:parent_tag children:child_tag* {
+    = parent: tag_parent children: tag_child* {
         parent.children = (parent.children || []).concat(children);
         return parent;
     }
-    / parent:text_parent children:text_child* {
-        console.log(parent, children, 'pc');
-        children.unshift(parent);
-        return children.join('\n');
+    / parent: pipeline_parent children: pipeline_child* {
+        return children.unshift(parent) && children.join('\\n');
+    }
+    
+tag_parent
+    = tag: tag_def {
+        return parents.push(tag) && tag;
     }
 
-text_parent
+tag_child
+    = tag_sep indent: tag_indent & {
+        return indent === parent().indent + 1 ? true : parents.pop() && false;
+    } tag: tag {
+        return tag;
+    }
+    
+tag_def
+    = tag_indent? name: identifier? clazz: tag_class* id: tag_id? clazz2: tag_class* & {
+        return name || clazz.length > 0 || id || clazz2.length > 0
+    } attrs: tag_attrs? text: tag_text? {
+        return { name: name, indent: IDT, clazz: clazz.concat(clazz2), id: id, attrs: attrs, text: text };
+    }
+    
+tag_class
+    = '.' name: identifier {
+        return name;
+    }
+    
+tag_id
+    = '#' name: identifier {
+        return name;
+    }
+    
+tag_indent
+    = indent: idt {
+        return IDT = indent || 0;
+    }
+
+tag_sep
+    = _* eol blank_line* {
+        IDT = 0;
+    }
+////////////////////
+// tag itself end //
+////////////////////
+
+/////////////////////////
+// tag attribute start //
+/////////////////////////
+tag_attrs
+    = _* '(' attrs:(tag_attrs_inline / tag_attrs_lines) {
+        var result = {}, i;
+        for (i = 0; i < attrs.length; i ++) result[attrs[i].name] = attrs[i].value;
+        return result;
+    }
+    
+tag_attrs_inline
+    = _* first: taid rest: (tais a: taid { return a;})* _* ')' {
+        return rest.unshift(first) && rest;
+    }
+
+tag_attrs_lines
+    = _* eol first: tal rest: (eol l: tal { return l; })* tale {
+        return rest.unshift(first) && rest;
+    }
+
+tal "Tag attribute line"
+    = indent: tali & {
+        return indent === IDT + 1
+    } name: identifier value: (_* '=' _* str: (quoted_string / text_to_end) {return str;}) {
+        return { name: name, value: value };
+    }
+    
+tale "Tag attribute line end"
+    = eol (indent: taid & {
+        return indent === IDT;
+    })? ')'
+    
+tali "Tag attribute line indent"
+    = indent: idt {
+        return indent;
+    }
+
+taid "Inline tag attribute definition"
+    = name: identifier value: (_* '=' _* str: (quoted_string / identifier) { return str;})? {
+        return { name: name, value: value };
+    }
+
+tais "Inline tag attribute seperator"
+    = _* ','? _*
+///////////////////////
+// tag attribute end //
+///////////////////////
+
+////////////////////
+// tag text start //
+////////////////////
+tag_text
+    = '.' _* eol text: tag_text_lines {
+        return text;
+    }
+    / _* text: text_to_end {
+        return text;
+    }
+    
+tag_text_lines
+    = first: ttl rest: (eol l: ttl { return l; })* {
+        rest.unshift(first);
+        return rest.join('\\n');
+    }
+    
+ttl "Tag text line"
+    = indent: ttli & {
+        return indent === IDT + 1;
+    } text: text_to_end {
+        return text;
+    }
+    
+ttli "Tag text line indent"
+    = indent: idt { 
+        return indent; 
+    }
+//////////////////
+// tag text end //
+//////////////////
+
+////////////////////
+// pipeline start //
+////////////////////
+pipeline_parent
     = text: pipeline {
         return text;
     }
 
-text_child
-    = newline indent:indent & {
-        return indent > getParent().indent
-    } text: pipeline {
+pipeline_child
+    = eol indent: pi & {
+        return indent === parent().indent + 1;
+    } text: pipeline_parent {
         return text;
-    }
-
-parent_tag
-    = tag:tag_def {
-        return parents.push(tag) && tag;
-    }
-
-child_tag
-    = tag_seperator indent:indent & {
-        return indent > getParent().indent ? true : parents.pop() && false
-    } child: tag {
-        return child;
     }
 
 pipeline
-    = "|" text: nobr {
+    = '|' _* text: text_to_end {
         return text;
     }
 
-tag_def
-    = indent? name: keyword? clazz:clazz* id:id? clazz2:clazz* & {
-        return name || clazz.length > 0 || id || clazz2.length > 0;
-    } attrs:attrs? text: text_tag? {
-        return {name: name || 'div', indent: IDT, clazz: clazz.concat(clazz2), id: id, attrs: attrs, text: text};
+pi "Pipeline indent"
+    = indent: idt {
+        return indent;
     }
 
-text_tag
-    = "." text: text_block+ {
-        return text.join('\n');
-    }
-    / whitespace* text: nobr {
-        return text;
+//////////////////
+// pipeline end //
+//////////////////
+
+///////////////////////
+// basic roles start //
+///////////////////////
+blank_line "Blank line"
+    = _* eol
+
+text_to_end "Text to end of line"
+    = (!eol .)+ {
+        return text();
     }
 
-text_block
-    = newline indent:text_indent & {
-        return indent > IDT;
-    } text: nobr {
-        return text;
+identifier "Identifier"
+    = start: [a-zA-Z$@_] rest: $[a-zA-Z0-9$_-]* {
+        return start + rest;
     }
 
+eol "End of line"
+    = '\n' / '\r' / '\r\n'
+    
+_ "Whitespace" 
+    = '\t' / ' ' / '\v' / '\f'
 
-clazz
-    = "." text: keyword {
-        return text;
+idt "Indents"
+    = spaces: $' '+ & {
+        if (IDT_TOK === null) IDT_TOK = spaces;
+        return spaces.length % IDT_TOK.length == 0;
+    } {
+        return spaces.length / IDT_TOK.length;
     }
-
-id
-    = "#" text: keyword {
-        return text;
-    }
-
-attrs
-    = newline? blank_line* whitespace* "("
-      first:attr next:(attr_seperator attr:attr {return attr;})*
-      newline? blank_line* whitespace* ")"
-    {
-        var result = {};
-        next.unshift(first);
-        for (var i = 0; i < next.length; i ++ ) result[next[i].name] = next[i].value;
-        return result;
+    / tabs: $ '\t'+ & {
+        if (IDT_TOK === null) IDT_TOK = '\t';
+        return IDT_TOK === '\t';
+    } {
+        return tabs.length;
     }
 
-attr
-    = name:keyword value:(whitespace? "=" whitespace? str:quoted_string {return str;})? {
-        return { name: name, value: value };
-    }
+quoted_string "Quoted string"
+    = '"' chars: $dqs* '"' { return chars; }
+    / "'" chars: $sqs* "'" { return chars; }
+    
+dqs "Double quoted string char"
+    = !('"' / '\\' / eol) . { return text(); }
+    / '\\' char: ec { return char; }
+    
+sqs "Single quoted string char"
+    = !("'" / '\\' / eol) . {return text(); }
+    / '\\' char: ec {return char; }
 
-quoted_string
-    = "'" str:("\\" char:. {return "\\" + char} / [^'])* "'" {
-        return str.join('');
-    }
-    / "\"" str:("\\" char:. {return "\\" + char} / [^\"])* "\"" {
-        return str.join('');
-    }
-
-attr_seperator
-    = whitespace* ("," / newline) blank_line* whitespace* {
-    }
-
-nobr
-    = text: [^\r\n]+ {
-        return text.join('');
-    }
-
-keyword
-    = first: [a-zA-Z] next: [a-zA-Z0-9_-]* {
-        return first + next.join('');
-    }
-
-tag_seperator
-    = whitespace* newline blank_line* {
-        IDT = 0;
-    }
-
-blank_line
-    = whitespace* newline {
-    }
-
-newline
-    = br: "\r"?"\n" {
-    }
-
-whitespace
-    = [ \t]+ {
-    }
-
-indent
-    = indents: [ \t]+ {
-        return IDT = indents.length;
-    }
-
-text_indent
-    = indents: [ \t]+ {
-       return indents.length;
-    }
+ec "Escaped char"
+    = '0' ![0-9] { return '\0' }
+    / '"' / "'" / '\\'
+    / c: [bnfrt] { return '\\' + c; }
+    / 'b' { return '\x0B' }
+    
+/////////////////////
+// basic roles end //
+/////////////////////

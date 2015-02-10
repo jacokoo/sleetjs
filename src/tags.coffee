@@ -4,7 +4,7 @@ exports.Tag = class Tag
     @types = {}
     @registerTag = (type, clazz) -> @types[type] = clazz
     @create = (options, parent) ->
-        name = options.name
+        name = options.name or 'div'
         clazz = @types[name] or Tag
         new clazz(options, parent)
 

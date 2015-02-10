@@ -4,7 +4,7 @@ html = """
 a.id
   b#a
   c abc
-  d(a="a", b="b").
+  d(a=a b=b, c="c&c").
     var demo = []
     demo.push('a')
 """
