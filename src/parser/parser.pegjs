@@ -174,7 +174,22 @@ pipeline_child
     }
 
 pipeline
-    = '|' _* text: text_to_end {
+    = '|.' _* eol text: pipeline_lines {
+        return text;
+    }
+    / '|' _* text: text_to_end {
+        return text;
+    }
+    
+pipeline_lines
+    = first: pll rest: (eol l: pll {return l;})* {
+        return rest.unshift(first) && rest.join('\\n');
+    }
+    
+pll 
+    = indent: pi & {
+        return indent === IDT + 1;
+    } text: text_to_end {
         return text;
     }
 

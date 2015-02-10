@@ -4,14 +4,14 @@ exports.Tag = class Tag
     @types = {}
     @registerTag = (type, clazz) -> @types[type] = clazz
     @create = (options, parent) ->
-        name = options.name or 'div'
+        name = options.name
         clazz = @types[name] or Tag
         new clazz(options, parent)
 
     constructor: (@options, @parent) ->
         @attributes = {}
         @content = ''
-        @name = options.name
+        @name = options.name or 'div'
         @indent = options.indent
 
         @setId(options.id) if options.id
