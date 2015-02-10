@@ -47,7 +47,7 @@ exports.Tag = class Tag
         haveContent = !! @content
         for item in @options.children
             if isString(item)
-                result.push '\\n' if haveContent
+                result.push '\n' if haveContent
                 result.push item
                 haveContent = true
             else

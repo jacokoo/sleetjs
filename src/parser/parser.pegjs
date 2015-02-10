@@ -24,7 +24,7 @@ tag
         return parent;
     }
     / parent: pipeline_parent children: pipeline_child* {
-        return children.unshift(parent) && children.join('\\n');
+        return children.unshift(parent) && children.join('\n');
     }
     
 tag_parent
@@ -139,19 +139,18 @@ tag_text
     
 tag_text_lines
     = first: ttl rest: (eol l: ttl { return l; })* {
-        rest.unshift(first);
-        return rest.join('\\n');
+        return rest.unshift(first) && rest.join('\n');
     }
     
 ttl "Tag text line"
     = indent: ttli & {
-        return indent === IDT + 1;
+        return indent.length >= (IDT + 1) * IDT_TOK.length;
     } text: text_to_end {
-        return text;
+        return indent + text;
     }
     
 ttli "Tag text line indent"
-    = indent: idt { 
+    = indent: $_+ {
         return indent; 
     }
 //////////////////
@@ -183,18 +182,18 @@ pipeline
     
 pipeline_lines
     = first: pll rest: (eol l: pll {return l;})* {
-        return rest.unshift(first) && rest.join('\\n');
+        return rest.unshift(first) && rest.join('\n');
     }
     
 pll 
     = indent: pi & {
-        return indent > IDT;
+        return indent.length >= (IDT + 1) * IDT_TOK.length;
     } text: text_to_end {
-        return text;
+        return indent.slice(IDT_TOK.length) + text;
     }
 
 pi "Pipeline indent"
-    = indent: idt {
+    = indent: $_+ {
         return indent;
     }
 
