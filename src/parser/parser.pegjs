@@ -96,9 +96,13 @@ tale "Tag attribute line end"
     = indent: tali? & {
         if (indent === IDT) return true;
         return false;
+    } {
+        return undefined;
     }
     / ws:_* & {
         return IDT === 0 && ws.length === 0;
+    } {
+        return undefined;
     }
 
 tag_attrs_inline
