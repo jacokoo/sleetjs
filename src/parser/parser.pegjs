@@ -42,7 +42,7 @@ tag_child
 tag_def
     = tag_indent? name: identifier? clazz: tag_class* id: tag_id? clazz2: tag_class* & {
         return name || clazz.length > 0 || id || clazz2.length > 0
-    } attrs: tag_attrs? text: (_+ t: tag_text { return t; })? {
+    } attrs: tag_attrs? text: (t: tag_text { return t; })? {
         return { name: name, indent: IDT, clazz: clazz.concat(clazz2), id: id, attrs: attrs, text: text };
     }
     
@@ -133,7 +133,7 @@ tag_text
     = '.' _* eol text: tag_text_lines {
         return text;
     }
-    / _* text: text_to_end {
+    / _+ text: text_to_end {
         return text;
     }
     
@@ -188,7 +188,7 @@ pipeline_lines
     
 pll 
     = indent: pi & {
-        return indent === IDT + 1;
+        return indent > IDT;
     } text: text_to_end {
         return text;
     }
