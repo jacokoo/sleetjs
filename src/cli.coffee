@@ -1,13 +1,12 @@
 fs = require 'fs'
 path = require 'path'
 compiler = require './compiler'
-{Tag} = require './tags'
 
 log = (msg) -> console.log '  ' + msg
 
 err = (msg) ->
-  msg += '\n'
-  if (log.print) then log(msg) || process.exit(1) else throw msg
+    msg += '\n'
+    if (log.print) then log(msg) || process.exit(1) else throw msg
 
 help = ->
     log """

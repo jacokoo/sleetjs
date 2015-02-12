@@ -7,7 +7,7 @@
 
 start
     = blank_line* tags: tags blank_line* _* {
-        return tags;
+        return { tags: tags, indent: IDT_TOK };
     }
 
 //////////////////////
@@ -166,12 +166,12 @@ tag_text
     
 tag_text_lines
     = first: ttl rest: (eol l: ttl { return l; })* {
-        return rest.unshift(first) && rest.join('\n');
+        return rest.unshift(first) && rest;
     }
     
 ttl "Tag text line"
     = indent: ttli & {
-        return indent.length >= (IDT + 1) * IDT_TOK.length;
+        return indent.length >= (IDT + 1) * (IDT_TOK || '').length;
     } text: text_to_end {
         return indent + text;
     }
