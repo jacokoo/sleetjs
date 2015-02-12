@@ -14,8 +14,11 @@ exports.Tag = class Tag
         @name = options.name or 'div'
         @indent = options.indent
 
-        @setId(options.id) if options.id
-        @setClass(options.clazz) if options.clazz.length > 0
+        @setId(options.hash) if options.hash
+        for group in options.attributeGroups
+            @setAttribute key, value for key, value of group.attributes
+
+        @setClass(options.dot) if options.dot.length > 0
         @appendContent(options.text) if options.text
         @setAttribute key, value for key, value of options.attrs or {}
 

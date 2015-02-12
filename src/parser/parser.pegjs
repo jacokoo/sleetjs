@@ -45,8 +45,15 @@ tag_child
 tag_def
     = tag_indent? name: identifier? clazz: tag_class* id: tag_id? clazz2: tag_class* & {
         return name || clazz.length > 0 || id || clazz2.length > 0
-    } attrs: tag_attrs? text: (t: tag_text { return t; })? {
-        return { name: name, indent: IDT, clazz: clazz.concat(clazz2), id: id, attrs: attrs, text: text };
+    } attrs: tag_attr_groups? text: (t: tag_text { return t; })? {
+        return { 
+            name: name,
+            indent: IDT,
+            dot: clazz.concat(clazz2), 
+            hash: id,
+            attributeGroups: attrs || [],
+            text: text
+        };
     }
     
 tag_class
@@ -75,18 +82,39 @@ tag_sep
 /////////////////////////
 // tag attribute start //
 /////////////////////////
-tag_attrs
-    = _* '(' attrs:(tag_attrs_inline / tag_attrs_lines) _* ')'{
-        var result = {}, i;
-        for (i = 0; i < attrs.length; i ++) if(attrs[i]) result[attrs[i].name] = attrs[i].value;
-        return result;
+tag_attr_groups
+    = groups: tag_attr_group+ {
+        return groups;
     }
     
-tag_attrs_lines
+tag_attr_group
+    = _* '(' attrs:(tag_attr_inline / tag_attr_lines) _* ')' predict: tag_attr_predict? {
+        var result = {}, i;
+        for (i = 0; i < attrs.length; i ++) if(attrs[i]) result[attrs[i].name] = attrs[i].value;
+        return { attributes: result, predict: predict};
+    }
+    
+tag_attr_lines
     = _* eol first: tal rest: (eol l: tal { return l; })* {
         return rest.unshift(first) && rest;
     }
 
+
+tag_attr_inline
+    = _* first: taid rest: (tais a: taid { return a;})* {
+        return rest.unshift(first) && rest;
+    }
+    
+tag_attr_predict
+    = _* '&' _* name: identifier? '(' content: tpc ')' {
+        return { name: name, content: content};
+    }
+    
+tpc "Tag predict content"
+    = (!(eol / ')') .)+ {
+        return text();
+    }
+    
 tal "Tag attribute line"
     = indent: tali & {
         return indent === IDT + 1
@@ -108,10 +136,6 @@ tale "Tag attribute line end"
         return undefined;
     }
 
-tag_attrs_inline
-    = _* first: taid rest: (tais a: taid { return a;})* {
-        return rest.unshift(first) && rest;
-    }
 
 taid "Inline tag attribute definition"
     = name: identifier value: (_* '=' _* str: (quoted_string / identifier) { return str;})? {
