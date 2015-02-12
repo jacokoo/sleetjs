@@ -38,6 +38,9 @@ tag_child
     } tag: tag {
         return tag;
     }
+    / ':' _* tag: tag {
+        return tag;
+    }
     
 tag_def
     = tag_indent? name: identifier? clazz: tag_class* id: tag_id? clazz2: tag_class* & {
