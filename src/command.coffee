@@ -1,3 +1,7 @@
+fs = require 'fs'
+path = require 'path'
+{compile} = require './sleet'
+
 yargs = require('yargs').usage '$0 [options] input.st'
     .describe 'o', 'Output file (the default file is a same name file with a `html` extension)'
     .describe 'w', 'Watch file changes'
@@ -11,9 +15,15 @@ yargs = require('yargs').usage '$0 [options] input.st'
     .boolean 'h'
     .boolean 'w'
 
+read = (file = '-') ->
+    if file is '-'
+
+
 exports.run = ->
     argv = yargs.argv
-    yargs.showHelp() if argv.h
+    file = argv._[0]
+    yargs.showHelp() if argv.h or not file
 
-    console.log argv
+    content = fs.readFileSync(file, 'utf8')
+    console.log content compile content
     console.log('done')

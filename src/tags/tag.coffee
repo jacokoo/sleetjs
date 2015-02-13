@@ -5,14 +5,14 @@ isArray = (arr) -> toString.call(arr) is '[object Array]'
 exports.Tag = class Tag
     constructor: (@options, @parent = {}) ->
         @attributes = {}
-        @content = options.text or ''
-        @name = options.name or 'div'
-        @indent = options.indent or 0
+        @content = @options.text or ''
+        @name = @options.name or 'div'
+        @indent = @options.indent or 0
 
-        @setAttribute('id', options.hash) if options.hash
-        @setAttribute('class', dot) for dot in options.dot
-        @attributeGroups = options.attributeGroups
-        @children = options.children
+        @setAttribute('id', @options.hash) if @options.hash
+        @setAttribute('class', dot) for dot in @options.dot
+        @attributeGroups = @options.attributeGroups
+        @children = @options.children
 
         @haveInlineChild = false
         @isInline = @indent is @parent.indent
