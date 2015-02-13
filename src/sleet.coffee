@@ -1,4 +1,4 @@
-parser = require './parser/parser'
+parser = require './parser'
 {Tag} = require './tags/tag'
 {EmptyTag} = require './tags/empty-tag'
 {Predict} = require './tags/predict'
@@ -76,7 +76,7 @@ defaultTags =
     markdown: Markdown
     '@include': Include
 
-compile = exports.compile = (input, options = {}) ->
+exports.compile = (input, options = {}) ->
     {tags, indent} = parser.parse input
 
     context = new Context(indent)

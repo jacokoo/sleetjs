@@ -1,5 +1,5 @@
 {Tag} = require './tag'
-{parse} = require '../parser/parser'
+{parse} = require '../parser'
 fs = require 'fs'
 
 exports.Include = class Include extends Tag

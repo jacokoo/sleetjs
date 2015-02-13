@@ -1,4 +1,4 @@
 .DS_Store
 npm-debug.log
 bower_components/
-src/**/*.coffee
+src
