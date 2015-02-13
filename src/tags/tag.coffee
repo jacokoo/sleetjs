@@ -7,7 +7,7 @@ exports.Tag = class Tag
         @attributes = {}
         @content = options.text or ''
         @name = options.name or 'div'
-        @indent = options.indent
+        @indent = options.indent or 0
 
         @setAttribute('id', options.hash) if options.hash
         @setAttribute('class', dot) for dot in options.dot.length
@@ -17,6 +17,9 @@ exports.Tag = class Tag
         @haveInlineChild = false
         @isInline = @indent is @parent.indent
         @parent.haveInlineChild = @isInline
+
+    isString: isString
+    isArray: isArray
 
     setAttribute: (name, value) ->
         if name is 'clazz' or name is 'class'
@@ -88,5 +91,6 @@ exports.Tag = class Tag
 
     generateClose: (context) ->
         return unless @haveContent()
-        context.indent(@indent) if @needNewLineTokenAfterTagOpen()
+        context.indent(@indent) if @needNewLineTokenAfterTagOpen() and not @haveInlineChild
+        context.pop() if @haveInlineChild
         context.push('</').push(@name).push('>').eol()

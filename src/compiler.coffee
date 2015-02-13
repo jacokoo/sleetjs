@@ -2,6 +2,10 @@ parser = require './parser/parser'
 {Tag} = require './tags/tag'
 {EmptyTag} = require './tags/empty-tag'
 {Predict} = require './tags/predict'
+{Doctype} = require './tags/doctype'
+{Coffee} = require './tags/transformers/coffee'
+{Uglify} = require './tags/transformers/uglify'
+{Markdown} = require './tags/transformers/markdown'
 
 class Context
     constructor: (@indentToken = '  ', @newlineToken = '\n') ->
@@ -9,10 +13,19 @@ class Context
         @tagTypes = {}
         @predictTypes = {}
 
-    indent: (level) ->
+    sub: ->
+        sub = new Context(@indentToken, @newlineToken)
+        sub.tagTypes = @tagTypes
+        sub.predictTypes = @predictTypes
+        sub
+
+    getIndent: (level) ->
         idt = ''
         idt += @indentToken for i in [0...level]
-        @result.push idt
+        idt
+
+    indent: (level) ->
+        @result.push @getIndent(level)
         @
 
     eol: ->
@@ -50,12 +63,18 @@ class Context
     getOutput: -> @result.join ''
 
 emptyTags = ['input', 'br', 'hr', 'link', 'img', 'meta']
+defaultTags =
+    doctype: Doctype
+    coffee: Coffee
+    uglify: Uglify
+    markdown: Markdown
 
 compile = exports.compile = (input, options = {}) ->
     {tags, indent} = parser.parse input
 
     context = new Context(indent)
     context.registerTag item, EmptyTag for item in emptyTags
+    context.registerTag key, value for key, value of defaultTags
 
     for key, value of options.tags or {}
         context.registerTag key, value
@@ -66,5 +85,6 @@ compile = exports.compile = (input, options = {}) ->
         tag = context.createTag item
         tag.generate(context)
         context.eol()
+    context.pop()
 
     context.getOutput()
