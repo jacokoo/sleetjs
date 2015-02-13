@@ -175,6 +175,9 @@ ttl "Tag text line"
     } text: text_to_end {
         return indent + text;
     }
+    / ws: $(w: _* & eol {return w;} ) {
+        return ws;
+    }
     
 ttli "Tag text line indent"
     = indent: $_+ {
@@ -217,6 +220,9 @@ pll
         return indent.length >= (IDT + 1) * IDT_TOK.length;
     } text: text_to_end {
         return indent.slice(IDT_TOK.length) + text;
+    }
+    / ws: $(w: _* & eol {return w;} ) {
+        return ws;
     }
 
 pi "Pipeline indent"
