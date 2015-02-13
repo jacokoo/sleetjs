@@ -3,25 +3,26 @@ parser = require './parser/parser'
 {EmptyTag} = require './tags/empty-tag'
 {Predict} = require './tags/predict'
 {Doctype} = require './tags/doctype'
+{Include} = require './tags/include'
 {Coffee} = require './tags/transformers/coffee'
 {Uglify} = require './tags/transformers/uglify'
 {Markdown} = require './tags/transformers/markdown'
 
 class Context
-    constructor: (@indentToken = '  ', @newlineToken = '\n') ->
+    constructor: (@indentToken = '  ', @newlineToken = '\n', @defaultLevel = 0) ->
         @result = []
         @tagTypes = {}
         @predictTypes = {}
 
-    sub: ->
-        sub = new Context(@indentToken, @newlineToken)
+    sub: (level) ->
+        sub = new Context(@indentToken, @newlineToken, level or @defaultLevel)
         sub.tagTypes = @tagTypes
         sub.predictTypes = @predictTypes
         sub
 
     getIndent: (level) ->
         idt = ''
-        idt += @indentToken for i in [0...level]
+        idt += @indentToken for i in [0...level + @defaultLevel]
         idt
 
     indent: (level) ->
@@ -60,6 +61,11 @@ class Context
         clazz = @predictTypes[name] or Predict
         new clazz(options, tag)
 
+    generate: (tags) ->
+        for item in tags
+            tag = @createTag item
+            tag.generate @
+
     getOutput: -> @result.join ''
 
 emptyTags = ['input', 'br', 'hr', 'link', 'img', 'meta']
@@ -68,6 +74,7 @@ defaultTags =
     coffee: Coffee
     uglify: Uglify
     markdown: Markdown
+    '@include': Include
 
 compile = exports.compile = (input, options = {}) ->
     {tags, indent} = parser.parse input
@@ -81,10 +88,5 @@ compile = exports.compile = (input, options = {}) ->
     for key, value of options.predicts or {}
         context.registerPredict key, value
 
-    for item in tags
-        tag = context.createTag item
-        tag.generate(context)
-        context.eol()
-    context.pop()
-
+    context.generate(tags)
     context.getOutput()

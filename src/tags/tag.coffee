@@ -10,7 +10,7 @@ exports.Tag = class Tag
         @indent = options.indent or 0
 
         @setAttribute('id', options.hash) if options.hash
-        @setAttribute('class', dot) for dot in options.dot.length
+        @setAttribute('class', dot) for dot in options.dot
         @attributeGroups = options.attributeGroups
         @children = options.children
 
