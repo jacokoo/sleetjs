@@ -64,7 +64,7 @@ exports.Tag = class Tag
 
     generateOpenEnd: (context) ->
         context.push(if not @selfClosing() then '>' else '/>')
-        context.eol() if @needNewLineTokenAfterTagOpen()
+        context.eol() if @needNewLineTokenAfterTagOpen() or @selfClosing()
 
     needNewLineTokenAfterTagOpen: ->
         return true if @children.length > 0
