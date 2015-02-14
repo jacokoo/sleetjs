@@ -9,7 +9,7 @@ exports.Comment = class Comment extends Tag
         context.indent(@indent)
         context.push('<!--')
         if @isArray(@content)
-            context.eol().push(@content.join('\n'))
+            context.eol().push(@content.join('\n')).eol()
             context.indent(@indent).push('-->').eol()
         else
             context.push(' ').push(@content).push(' -->').eol()

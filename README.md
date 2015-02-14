@@ -32,7 +32,7 @@ Options:
 
 The option `-o, --output` is used to specify out folder. Any file inputs will be
 placed in the destination folder flatly. And directory inputs will keep the sub
-structions.
+directory structure.
 
 #### examples:
 - Compile a directory tree of `.sleet` files in `src` into a parallel tree of
