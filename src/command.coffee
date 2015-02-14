@@ -9,7 +9,7 @@ MODE = 0o777 & ~process.umask()
 VERSION = 'Sleet version <%= version %>'
 
 yargs = require('yargs').usage '$0 [options] input.st [input2.st...]'
-    .describe 'o', 'The output diretory'
+    .describe 'o', 'The output directory'
     .describe 'e', 'The file extension of output file'
     .describe 'w', 'Watch file changes'
     .describe 'v', 'Show the version number'
