@@ -290,3 +290,9 @@ compiles to
     </div>
 </div>
 ```
+
+## API
+to be continued
+
+## License
+MIT
