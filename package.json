@@ -7,6 +7,10 @@
     "sleet": "bin/sleet"
   },
   "author": "Jaco Koo <jaco.koo@guyong.in>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/JacoKoo/sleetjs.git"
+  },
   "license": "MIT",
   "dependencies": {
     "yargs": "^2.3.0"
@@ -19,6 +23,7 @@
     "gulp-coffeelint": "^0.4.0",
     "gulp-peg": "^0.1.2",
     "gulp-shell": "^0.3.0",
+    "gulp-template": "^3.0.0",
     "gulp-uglify": "^1.1.0",
     "pegjs": "^0.8.0"
   }

@@ -77,7 +77,13 @@ defaultTags =
     '@include': Include
 
 exports.compile = (input, options = {}) ->
-    {tags, indent} = parser.parse input
+    try
+        {tags, indent} = parser.parse input
+    catch e
+        if e instanceof parser.SyntaxError
+            throw new Error("#{e.message} [line: #{e.line}, column: #{e.column}]")
+        else
+            throw e
 
     context = new Context(indent)
     context.registerTag item, EmptyTag for item in emptyTags
