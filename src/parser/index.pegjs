@@ -26,6 +26,13 @@ tag
     / parent: pipeline_parent children: pipeline_child* {
         return children.unshift(parent) && children.join('\n');
     }
+    / parent: comment_parent children: comment_child* {
+        return {
+            text: parent,
+            name: '[COMMENT]',
+            indent: IDT
+        };
+    }
     
 tag_parent
     = tag: tag_def {
@@ -233,6 +240,52 @@ pi "Pipeline indent"
 //////////////////
 // pipeline end //
 //////////////////
+
+///////////////////
+// comment start //
+///////////////////
+comment_parent
+    = text: comment {
+        return text;
+    }
+
+comment_child
+    = eol indent: ci & {
+        return indent === parent().indent + 1;
+    } text: pipeline_parent {
+        return text;
+    }
+
+comment
+    = '#.' _* eol text: comment_lines {
+        return text;
+    }
+    / '#' _+ text: text_to_end {
+        return text;
+    }
+    
+comment_lines
+    = first: cll rest: (eol l: cll {return l;})* {
+        return rest.unshift(first) && rest;
+    }
+    
+cll 
+    = indent: ci & {
+        return indent.length >= (IDT + 1) * IDT_TOK.length;
+    } text: text_to_end {
+        return indent + text;
+    }
+    / ws: $(w: _* & eol {return w;} ) {
+        return ws;
+    }
+
+ci "Comment indent"
+    = indent: $_+ {
+        return indent;
+    }
+/////////////////
+// comment end //
+/////////////////
 
 ///////////////////////
 // basic rules start //

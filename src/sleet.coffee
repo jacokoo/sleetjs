@@ -8,6 +8,7 @@ parser = require './parser'
 {Uglify} = require './tags/transformers/uglify'
 {Markdown} = require './tags/transformers/markdown'
 {Transformer} = require './tags/transformers/transformer'
+{Comment} = require './tags/comment'
 
 class Context
     constructor: (@indentToken = '  ', @newlineToken = '\n', @defaultLevel = 0) ->
@@ -80,6 +81,7 @@ defaultTags =
     coffee: Coffee
     uglify: Uglify
     markdown: Markdown
+    '[COMMENT]': Comment
     '@include': Include
 
 compile = (input, options = {}) ->
