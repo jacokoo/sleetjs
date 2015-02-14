@@ -63,8 +63,8 @@ exports.Tag = class Tag
         context.push(' ').push(name).push('="').push(value).push('"')
 
     generateOpenEnd: (context) ->
-        context.push(if @haveContent() then '>' else '/>')
-        context.eol() if @needNewLineTokenAfterTagOpen() or not @haveContent()
+        context.push(if not @selfClosing() then '>' else '/>')
+        context.eol() if @needNewLineTokenAfterTagOpen()
 
     needNewLineTokenAfterTagOpen: ->
         return true if @children.length > 0
@@ -74,8 +74,7 @@ exports.Tag = class Tag
     needTextIndent: ->
         @needNewLineTokenAfterTagOpen() and isString(@content)
 
-    haveContent: ->
-        !!@content or @children.length isnt 0
+    selfClosing: -> false
 
     generateContent: (context) ->
         if @content
@@ -90,7 +89,7 @@ exports.Tag = class Tag
                 context.createTag(item, @).generate(context)
 
     generateClose: (context) ->
-        return unless @haveContent()
+        return if @selfClosing()
         context.indent(@indent) if @needNewLineTokenAfterTagOpen() and not @haveInlineChild
         context.pop() if @haveInlineChild
         context.push('</').push(@name).push('>').eol()

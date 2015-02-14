@@ -7,6 +7,7 @@ parser = require './parser'
 {Coffee} = require './tags/transformers/coffee'
 {Uglify} = require './tags/transformers/uglify'
 {Markdown} = require './tags/transformers/markdown'
+{Transformer} = require './tags/transformers/transformer'
 
 class Context
     constructor: (@indentToken = '  ', @newlineToken = '\n', @defaultLevel = 0) ->
@@ -68,7 +69,12 @@ class Context
 
     getOutput: -> @result.join ''
 
-emptyTags = ['input', 'br', 'hr', 'link', 'img', 'meta']
+emptyTags = [
+    'area', 'base', 'br', 'col', 'command'
+    'embed', 'hr', 'img', 'input', 'keygen'
+    'link', 'meta', 'param', 'source', 'track', 'wbr'
+]
+
 defaultTags =
     doctype: Doctype
     coffee: Coffee
@@ -76,7 +82,7 @@ defaultTags =
     markdown: Markdown
     '@include': Include
 
-exports.compile = (input, options = {}) ->
+compile = (input, options = {}) ->
     try
         {tags, indent} = parser.parse input
     catch e
@@ -96,3 +102,10 @@ exports.compile = (input, options = {}) ->
 
     context.generate(tags)
     context.getOutput()
+
+module.exports =
+    compile: compile
+    Tag: Tag
+    EmptyTag: EmptyTag
+    Predict: Predict
+    Transformer: Transformer

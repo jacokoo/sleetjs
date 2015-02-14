@@ -21,4 +21,4 @@ exports.Doctype = class Doctype extends Tag
             type = key for key, value of @attributes when value is null
         type or = 'html'
 
-        context.push(TYPES[type] or TYPES.html)
+        context.push(TYPES[type] or TYPES.html).eol()
