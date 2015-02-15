@@ -1,6 +1,5 @@
 fs = require 'fs'
 path = require 'path'
-watchr = require 'watchr'
 {compile} = require './sleet'
 
 SLEET_FILE = '.sleet'
@@ -25,8 +24,10 @@ yargs = require('yargs').usage '$0 [options] input.st [input2.st...]'
     .string 'e'
     .string 'o'
 
-exports.run = ->
+exports.run = (compileOptions = {}) ->
     argv = yargs.argv
+    argv.compileOptions = compileOptions
+
     files = argv._.slice()
     return yargs.showHelp() if argv.h
     return console.log VERSION if argv.v
@@ -61,11 +62,11 @@ checkExists = (files) ->
 
 
 compileFile = (file, options) ->
-    compileIt file, getOutputFile(file, options)
+    compileIt file, getOutputFile(file, options), options
 
 compileDir = (dir, options) ->
     for file in getDirctoryFiles path.resolve(dir)
-        compileIt file, getOutputFile(file, options, dir)
+        compileIt file, getOutputFile(file, options, dir), options
 
 watchDir = (dir, options, watched, root) ->
     console.log "watching directory #{dir}"
@@ -117,7 +118,7 @@ checkWatchedFile = (file, obj, options, dir) ->
     return if obj.compiling
     obj.last = time
     obj.compiling = true
-    compileIt file, getOutputFile(file, options, dir)
+    compileIt file, getOutputFile(file, options, dir), options
     obj.compiling = false
 
 getOutputFile = (file, options, base) ->
@@ -137,10 +138,10 @@ getDirctoryFiles = (dir, notRecursive) ->
     dirfiles dir, result, notRecursive
     result
 
-compileIt = (input, out) ->
+compileIt = (input, out, options) ->
     content = fs.readFileSync(input, 'utf8')
     try
-        output = compile content
+        output = compile content, options.compileOptions
     catch e
         return console.error e
 
