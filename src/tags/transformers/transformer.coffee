@@ -6,7 +6,7 @@ exports.Transformer = class Transformer extends Tag
         @parent.haveInlineChild = false
 
     generate: (context) ->
-        sub = context.sub()
+        sub = context.sub(@indent)
         options = @getOptions()
         @generateContent(sub)
         content = sub.getOutput()

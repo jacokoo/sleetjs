@@ -113,7 +113,7 @@ tag_attr_inline
     }
     
 tag_attr_predict
-    = _* '&' _* name: identifier? '(' content: tpc ')' {
+    = _* '&' _* name: identifier content:('(' c: tpc ')' { return c; })? {
         return { name: name, content: content};
     }
     
