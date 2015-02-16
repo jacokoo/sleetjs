@@ -178,6 +178,9 @@ tag_text_lines
     
 ttl "Tag text line"
     = indent: ttli & {
+        if (IDT_TOK === null) {
+            IDT_TOK = indent.indexOf('\t') < 0 ? indent : '\t';
+        }
         return indent.length >= (IDT + 1) * (IDT_TOK || '').length;
     } text: text_to_end {
         return indent + text;

@@ -1,5 +1,13 @@
 {Tag} = require '../tag'
 
+outdentIt = (content, dent) ->
+    return content unless dent.length > 0
+    content.replace(new RegExp('^' + dent), '').replace(new RegExp('\n' + dent, 'g'), '\n')
+
+indentIt = (content, dent) ->
+    return content unless dent.length > 0
+    dent + content.replace(new RegExp('\n(?!$)(?! *\n)', 'g'), '\n' + dent)
+
 exports.Transformer = class Transformer extends Tag
     constructor: ->
         super
@@ -9,8 +17,11 @@ exports.Transformer = class Transformer extends Tag
         sub = context.sub(@indent)
         options = @getOptions()
         @generateContent(sub)
-        content = sub.getOutput()
-        context.push @transform content, options, sub
+        content = outdentIt sub.getOutput(), context.getIndent(@indent + 1)
+
+        indent = context.getIndent(if @isInline then @indent + 1 else @indent)
+        transformed = indentIt @transform(content, options, sub), indent
+        context.push(transformed)
 
     transform: (content, options) ->
 
@@ -20,13 +31,3 @@ exports.Transformer = class Transformer extends Tag
         options = {}
         options[key] = value for key, value of item.attributes for item in @attributeGroups
         options
-
-    getContent: ->
-        code = []
-        if @isString @content
-            code.push @content
-        else if @isArray @content
-            code = code.concat @content
-        code.push item for item in @children when @isString(item)
-
-        return code.join '\n'
