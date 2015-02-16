@@ -82,7 +82,7 @@ compiles to:
         <title>Welcom to Sleetjs</title>
         <link rel="stylesheet" href="index.css"/>
         <script type="text/javascript">
-var number,square;number=2,square=function(r){return r*r},console.log(square(number));
+            var number,square;number=2,square=function(r){return r*r},console.log(square(number));
         </script>
     </head>
     <body>
@@ -289,6 +289,167 @@ compiles to
         <div class="col-md-12">text</div>
     </div>
 </div>
+```
+
+### Buildin Tags
+These tags are extended by default.
+
+#### Self-closing Tags
+All these tags are self-closing tag
+```
+'area', 'base', 'br', 'col', 'command'
+'embed', 'hr', 'img', 'input', 'keygen'
+'link', 'meta', 'param', 'source', 'track', 'wbr'
+```
+
+#### Doctype
+doctype html
+```
+<!DOCTYPE html>
+```
+doctype xml
+```
+<?xml version="1.0" encoding="utf-8" ?>
+```
+doctype transitional
+```
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+```
+doctype strict
+```
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+```
+doctype frameset
+```
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Frameset//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-frameset.dtd">
+```
+doctype 1.1
+```
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+```
+doctype basic
+```
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML Basic 1.1//EN" "http://www.w3.org/TR/xhtml-basic/xhtml-basic11.dtd">
+```
+doctype mobile
+```
+<!DOCTYPE html PUBLIC "-//WAPFORUM//DTD XHTML Mobile 1.2//EN" "http://www.openmobilealliance.org/tech/DTD/xhtml-mobile12.dtd">
+```
+
+#### @include
+@include is to include another sleet file into current file.
+
+```
+# a.sleet
+.input-group
+  span.input-group-addon @
+  input.form-control(placeholder=Username)
+
+
+# b.sleet
+.panel.panel-default
+    .panel-heading
+        h3.panel-title Panel title
+    .panel-body
+        @include ./a.sleet
+```
+compiles to
+```html
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h3 class="panel-title">Panel title</h3>
+    </div>
+    <div class="panel-body">
+        <div class="input-group">
+            <span class="input-group-addon">@</span>
+            <input class="form-control" placeholder="Username"/>
+        </div>
+    </div>
+</div>
+```
+
+#### Transformers
+Transformers are used to transform text content to another format.
+`coffee`, `markdown`, `uglify` are supported by default. Make sure you
+have the corresponding lib installed to use them. `coffee` needs `coffee-script`,
+`markdown` needs `marked` and `uglify` needs `uglify-js`.
+
+##### Coffee
+```
+script
+    coffee.
+        foods = ['broccoli', 'spinach', 'chocolate']
+        eat food for food in foods when food isnt 'chocolate'
+```
+compiles to
+```html
+<script>
+    (function() {
+      var food, foods, _i, _len;
+
+      foods = ['broccoli', 'spinach', 'chocolate'];
+
+      for (_i = 0, _len = foods.length; _i < _len; _i++) {
+        food = foods[_i];
+        if (food !== 'chocolate') {
+          eat(food);
+        }
+      }
+
+    }).call(this);
+</script>
+```
+
+##### Uglify
+```
+script
+    uglify.
+        (function() {
+          var food, foods, _i, _len;
+
+          foods = ['broccoli', 'spinach', 'chocolate'];
+
+          for (_i = 0, _len = foods.length; _i < _len; _i++) {
+            food = foods[_i];
+            if (food !== 'chocolate') {
+              eat(food);
+            }
+          }
+
+        }).call(this);
+```
+compiles to
+```html
+<script>
+    (function(){var c,o,a,l;for(o=["broccoli","spinach","chocolate"],a=0,l=o.length;l>a;a++)c=o[a],"chocolate"!==c&&eat(c)}).call(this);
+</script>
+```
+
+or you can combine them
+```
+script: uglify: coffee.
+    foods = ['broccoli', 'spinach', 'chocolate']
+    eat food for food in foods when food isnt 'chocolate'
+```
+compiles to
+```html
+<script>
+    (function(){var c,o,a,l;for(o=["broccoli","spinach","chocolate"],a=0,l=o.length;l>a;a++)c=o[a],"chocolate"!==c&&eat(c)}).call(this);
+</script>
+```
+
+##### Markdown
+```
+html: body: markdown.
+    # Sleetjs
+    Sleetjs is a litte indent-based language that compiles into HTML/XML.
+```
+compiles to
+```html
+<html><body>
+    <h1 id="sleetjs">Sleetjs</h1>
+    <p>Sleetjs is a litte indent-based language that compiles into HTML/XML.</p>
+</body></html>
 ```
 
 ## API
