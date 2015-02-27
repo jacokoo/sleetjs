@@ -1,4 +1,5 @@
 parser = require './parser'
+{Context} = require './context'
 {Tag} = require './tags/tag'
 {EmptyTag} = require './tags/empty-tag'
 {Predict} = require './tags/predict'
@@ -9,66 +10,6 @@ parser = require './parser'
 {Markdown} = require './tags/transformers/markdown'
 {Transformer} = require './tags/transformers/transformer'
 {Comment} = require './tags/comment'
-
-class Context
-    constructor: (@indentToken = '  ', @newlineToken = '\n', @defaultLevel = 0) ->
-        @result = []
-        @tagTypes = {}
-        @predictTypes = {}
-
-    sub: (level) ->
-        sub = new Context(@indentToken, @newlineToken, level or @defaultLevel)
-        sub.tagTypes = @tagTypes
-        sub.predictTypes = @predictTypes
-        sub
-
-    getIndent: (level) ->
-        idt = ''
-        idt += @indentToken for i in [0...level + @defaultLevel]
-        idt
-
-    indent: (level) ->
-        @result.push @getIndent(level)
-        @
-
-    eol: ->
-        @result.push @newlineToken
-        @
-
-    push: (text) ->
-        @result.push text
-        @
-
-    pop: ->
-        @result.pop()
-        @
-
-    last: (length) ->
-        @result.slice -length
-
-    registerTag: (name, clazz) ->
-        @tagTypes[name] = clazz
-        @
-
-    registerPredict: (name, clazz) ->
-        @predictTypes[name] = clazz
-        @
-
-    createTag: (options, parent) ->
-        name = options.name
-        clazz = @tagTypes[name] or Tag
-        new clazz(options, parent)
-
-    createPredict: (name, options, tag) ->
-        clazz = @predictTypes[name] or Predict
-        new clazz(options, tag)
-
-    generate: (tags) ->
-        for item in tags
-            tag = @createTag item
-            tag.generate @
-
-    getOutput: -> @result.join ''
 
 emptyTags = [
     'area', 'base', 'br', 'col', 'command'
@@ -93,7 +34,10 @@ compile = (input, options = {}) ->
         else
             throw e
 
-    context = new Context(indent)
+    context = options.context or new Context()
+    context.indentToken = indent
+    context.options = options
+
     context.registerTag item, EmptyTag for item in emptyTags
     context.registerTag key, value for key, value of defaultTags
 
