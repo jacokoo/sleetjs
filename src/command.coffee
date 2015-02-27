@@ -81,11 +81,11 @@ watchDir = (dir, options, watched, root) ->
             o = (obj.files[f] or= {})
             watchDir f, options, o, dir
 
-    obj.watcher = fs.watch dir
-        .on 'change', ->
-            for file in getDirctoryFiles dir, true
-                o = (obj.files[file] or= compiling: false, last: mtime(file))
-                checkWatchedFile file, o, options, root
+    obj.watcher = fs.watch(dir).on 'change', ->
+        for file in getDirctoryFiles dir, true
+            o = (obj.files[file] or= compiling: false, last: mtime(file))
+            checkWatchedFile file, o, options, root
+
 
 watchFile = (file, options, watched) ->
     console.log "watching file #{file}"
@@ -140,8 +140,10 @@ getDirctoryFiles = (dir, notRecursive) ->
 
 compileIt = (input, out, options) ->
     content = fs.readFileSync(input, 'utf8')
+    opt = options.compileOptions or {}
+    opt.filename = input
     try
-        output = compile content, options.compileOptions
+        output = compile content, opt
     catch e
         return console.error e
 

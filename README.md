@@ -100,7 +100,7 @@ compiles to:
 
 ### Tag
 The first character of a tag name can be `[a-zA-Z$@_]` and the rest can be
-`$[a-zA-Z0-9$_-]`.
+`[a-zA-Z0-9$_-]`.
 
 ```
 html
