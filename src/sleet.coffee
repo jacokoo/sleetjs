@@ -41,10 +41,11 @@ compile = (input, options = {}) ->
     context.registerTag item, EmptyTag for item in emptyTags
     context.registerTag key, value for key, value of defaultTags
 
-    for key, value of options.tags or {}
-        context.registerTag key, value
-    for key, value of options.predicts or {}
-        context.registerPredict key, value
+    context.registerTag key, value for key, value of options.tags or {}
+    context.registerPredict key, value for key, value of options.predicts or {}
+
+    context.setDefaultTag options.defaultTag if options.defaultTag
+    context.setDefaultPredict options.defaultPredict if options.defaultPredict
 
     context.generate(tags)
     context.getOutput()

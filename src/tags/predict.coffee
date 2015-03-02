@@ -10,4 +10,4 @@ exports.Predict = class Predict
         @content = options.predict.content
 
     generate: (context) ->
-        @tag.setAttribute key, value for key, value of @attributes
+        @tag.setAttribute item.name, item.value for item in @attributes

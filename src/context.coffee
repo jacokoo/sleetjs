@@ -2,15 +2,41 @@
 {Predict} = require './tags/predict'
 
 exports.Context = class Context
-    constructor: (@options = {}, @indentToken = '  ', @newlineToken = '\n', @defaultLevel = 0) ->
+    defaultTag: Tag
+    defaultPredict: Predict
+
+    setDefaultTag: (clazz) -> @defaultTag = clazz
+
+    setDefaultPredict: (clazz) -> @defaultPredict = clazz
+
+    registerTag: (name, clazz) ->
+        if @parent then @parent.registerTag name, clazz else @tagTypes[name] = clazz
+        @
+
+    registerPredict: (name, clazz) ->
+        if @parent then @parent.registerPredict name, clazz else @predictTypes[name] = clazz
+        @
+
+    createTag: (options, parent) ->
+        return @parent.createTag options, parent if @parent
+
+        name = options.name
+        clazz = @tagTypes[name] or @defaultTag
+        new clazz(options, parent)
+
+    createPredict: (name, options, tag) ->
+        return @parent.createPredict name, options, tag if @parent
+
+        clazz = @predictTypes[name] or @defaultPredict
+        new clazz(options, tag)
+
+    constructor: (@options = {}, @indentToken = '  ', @newlineToken = '\n', @defaultLevel = 0, @parent) ->
         @result = []
         @tagTypes = {}
         @predictTypes = {}
 
     sub: (level) ->
-        sub = new Context(@options, @indentToken, @newlineToken, level or @defaultLevel)
-        sub.tagTypes = @tagTypes
-        sub.predictTypes = @predictTypes
+        sub = new Context(@options, @indentToken, @newlineToken, level or @defaultLevel, @)
         sub
 
     getIndent: (level) ->
@@ -36,23 +62,6 @@ exports.Context = class Context
 
     last: (length) ->
         @result.slice -length
-
-    registerTag: (name, clazz) ->
-        @tagTypes[name] = clazz
-        @
-
-    registerPredict: (name, clazz) ->
-        @predictTypes[name] = clazz
-        @
-
-    createTag: (options, parent) ->
-        name = options.name
-        clazz = @tagTypes[name] or Tag
-        new clazz(options, parent)
-
-    createPredict: (name, options, tag) ->
-        clazz = @predictTypes[name] or Predict
-        new clazz(options, tag)
 
     generate: (tags) ->
         for item in tags

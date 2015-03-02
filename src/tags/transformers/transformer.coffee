@@ -29,5 +29,7 @@ exports.Transformer = class Transformer extends Tag
 
     getOptions: ->
         options = {}
-        options[key] = value for key, value of item.attributes for item in @attributeGroups
+        for item in @attributeGroups
+            for i in item.attributes
+                options[i.name.value] = if i.value is null or i.value.length is 0 then true else i.value[0].value
         options

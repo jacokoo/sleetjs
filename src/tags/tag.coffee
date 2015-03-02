@@ -4,7 +4,7 @@ isArray = (arr) -> toString.call(arr) is '[object Array]'
 
 exports.Tag = class Tag
     constructor: (@options, @parent = {}) ->
-        @attributes = {}
+        @attributes = []
         @content = @options.text or ''
         @name = @options.name or 'div'
         @indent = @options.indent or 0
@@ -22,13 +22,12 @@ exports.Tag = class Tag
     isArray: isArray
 
     setAttribute: (name, value) ->
-        if name is 'clazz' or name is 'class'
-            if @attributes['class']
-                @attributes['class'] += ' ' + value
-            else
-                @attributes['class'] = value
-        else
-            @attributes[name] = value
+        name = value: name, type: 'identifier' if isString name
+        value = [] if value is null
+        value = [value: value, type: 'quoted'] if isString value
+
+        attr = item for item in @attributes when item.name.value is name.value and item.name.type is name.type
+        if attr then attr.value = attr.value.concat value else @attributes.push name: name, value: value
 
     generate: (context) ->
         @generateOpenStart(context)
@@ -46,21 +45,23 @@ exports.Tag = class Tag
         context.push('<').push(@name)
 
     generateAttributes: (context) ->
-        predicted = []
         for item in @attributeGroups
             if item.predict
-                predicted.push item
+                predict = context.createPredict(item.predict.name, item, @)
+                predict.generate context
             else
-                @setAttribute key, value for key, value of item.attributes
+                @setAttribute item.name, item.value for item in item.attributes
 
-        for item in predicted
-            predict = context.createPredict(item.predict.name, item, @)
-            predict.generate context
+        @generateAttribute item, context for item in @attributes
 
-        @generateAttribute key, value, context for key, value of @attributes
+    generateAttribute: ({name, value}, context) ->
+        context.push(' ').push name.value
+        if name.value is 'class'
+            return context.push('="').push((item.value for item in value).join ' ').push('"')
 
-    generateAttribute: (name, value, context) ->
-        context.push(' ').push(name).push('="').push(value).push('"')
+        value.push name if value.length is 0
+
+        context.push('="').push((item.value for item in value).join '').push('"')
 
     generateOpenEnd: (context) ->
         context.push(if not @selfClosing() then '>' else '/>')
