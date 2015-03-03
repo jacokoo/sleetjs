@@ -95,18 +95,19 @@ tag_attr_groups
     }
 
 tag_attr_group
-    = _* '(' attrs:(tag_attr_inline / tag_attr_lines) _* ')' predict: tag_attr_predict? {
+    = _* '(' attrs:(tag_attr_inline / tag_attr_lines) ')' predict: tag_attr_predict? {
         return {attributes: attrs, predict: predict};
     }
 
 tag_attr_lines
-    = _* eol first: tal rest: (eol l: tal { return l; })* {
+    = _* eol first: tal rest: tal* ws:_* & {
+        return ws.length === IDT * IDT_TOK.length
+    } {
         return rest.unshift(first) && rest;
     }
 
-
 tag_attr_inline
-    = _* first: taid rest: (tais a: taid { return a;})* {
+    = _* first: taid rest: (tais a: taid {return a;})* _*{
         return rest.unshift(first) && rest;
     }
 
@@ -123,24 +124,9 @@ tpc "Tag predict content"
 tal "Tag attribute line"
     = indent: tali & {
         return indent === IDT + 1
-    } name: tavd value: (_* '=' _* v: talvd {return v;})? tale? {
+    } name: tavd value: (_* '=' _* v: talvd {return v;})? tals {
         return {name: name, value: value};
     }
-    / tale
-
-tale "Tag attribute line end"
-    = indent: tali? & {
-        if (indent === IDT) return true;
-        return false;
-    } {
-        return undefined;
-    }
-    / ws:_* & {
-        return IDT === 0 && ws.length === 0;
-    } {
-        return undefined;
-    }
-
 
 taid "Inline tag attribute definition"
     = name: tavd value: (_* '=' _* v: taivd { return v;})? {
@@ -169,6 +155,9 @@ talvd "Tag attribute line value definition"
 
 tais "Inline tag attribute seperator"
     = _* ','? _*
+
+tals "Tag attribute line seperator"
+    = eol blank_line*
 
 tali "Tag attribute line indent"
     = indent: idt {

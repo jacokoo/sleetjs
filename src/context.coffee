@@ -65,7 +65,7 @@ exports.Context = class Context
 
     generate: (tags) ->
         for item in tags
-            tag = @createTag item
+            tag = @createTag item, options: children: tags
             tag.generate @
 
     getOutput: -> @result.join ''
