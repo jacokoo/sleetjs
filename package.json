@@ -1,6 +1,6 @@
 {
   "name": "sleet",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Sleetjs is little language that compiles into HTML",
   "main": "lib/sleet.js",
   "bin": {
