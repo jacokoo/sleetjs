@@ -1,9 +1,19 @@
+```
+   _____ _           _          _     
+  / ____| |         | |        | |    
+ | (___ | | ___  ___| |_       | |___ 
+  \___ \| |/ _ \/ _ \ __|  _   | / __|
+  ____) | |  __/  __/ |_  | |__| \__ \
+ |_____/|_|\___|\___|\__|  \____/|___/
+```
+
 # Sleetjs
 Sleetjs is a litte indent-based language that compiles into HTML/XML.
 
 It is not a template engine , so it can't render data.
 However, you can override tags to generate a output file that can be used to
 render data with a template engine.
+
 
 ## Installation
 Make sure you have npm installed, then
