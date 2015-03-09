@@ -28,11 +28,14 @@ exports.run = (compileOptions = {}) ->
     argv = yargs.argv
     argv.compileOptions = compileOptions
 
-    files = argv._.slice()
+    argv.files = argv._.slice()
     return yargs.showHelp() if argv.h
     return console.log VERSION if argv.v
 
-    files = checkExists files
+    runIt argv
+
+runIt = exports.runIt = (options = {}) ->
+    files = checkExists(options.files or [])
     return unless files.length > 0
 
     watched =
@@ -41,15 +44,15 @@ exports.run = (compileOptions = {}) ->
 
     for file in files
         if fs.statSync(file).isDirectory()
-            compileDir file, argv
+            compileDir file, options
             watched.dirs[file] = true
         else
-            compileFile file, argv
+            compileFile file, options
             watched.files[file] = true
 
-    if argv.w
-        watchDir key, argv, watched.dirs for key, value of watched.dirs
-        watchFile key, argv, watched.files for key, value of watched.files when not isFileInWatchedDir(key, watched.dirs)
+    if options.watch
+        watchDir key, options, watched.dirs for key, value of watched.dirs
+        watchFile key, options, watched.files for key, value of watched.files when not isFileInWatchedDir(key, watched.dirs)
 
 checkExists = (files) ->
     results = []
@@ -147,7 +150,9 @@ compileIt = (input, out, options) ->
     catch e
         return console.error e
 
-    fs.writeFileSync out, output, 'utf8'
+    o = opt.transform?(output, input, out)
+    o or= output
+    fs.writeFileSync out, o, 'utf8'
     console.log "#{new Date().toLocaleTimeString()} - Compiled '#{input}' to '#{out}'"
 
 isFileInWatchedDir = (file, watched) ->

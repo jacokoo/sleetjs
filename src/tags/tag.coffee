@@ -55,6 +55,7 @@ exports.Tag = class Tag
         @generateAttribute item, context for item in @attributes
 
     generateAttribute: ({name, value}, context) ->
+        value or= []
         context.push(' ').push name.value
         if name.value is 'class'
             return context.push('="').push((item.value for item in value).join ' ').push('"')
