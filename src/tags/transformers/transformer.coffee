@@ -14,7 +14,7 @@ exports.Transformer = class Transformer extends Tag
         @parent.haveInlineChild = false
 
     generate: (context) ->
-        sub = context.sub(@indent)
+        sub = context.sub()
         options = @getOptions()
         @generateContent(sub)
         content = outdentIt sub.getOutput(), context.getIndent(@indent + 1)
