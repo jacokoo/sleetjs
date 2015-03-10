@@ -112,7 +112,7 @@ tag_attr_inline
     }
 
 tag_attr_predict
-    = _* '&' _* name: identifier content:('(' c: tpc ')' { return c; })? {
+    = _* '&' ! ([#a-zA-Z0-9]* ';') _* name: identifier content:('(' c: tpc ')' { return c; })? {
         return {name: name, content: content};
     }
 
@@ -178,7 +178,7 @@ tag_text
     = '.' _* eol text: tag_text_lines {
         return text;
     }
-    / _+ text: text_to_end {
+    / _ text: text_to_end {
         return text;
     }
 
@@ -227,7 +227,7 @@ pipeline
     = '|.' _* eol text: pipeline_lines {
         return text;
     }
-    / '|' _* text: text_to_end {
+    / '|' _? text: text_to_end {
         return text;
     }
 
