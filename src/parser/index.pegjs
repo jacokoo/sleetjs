@@ -180,7 +180,7 @@ taivd "Inline tag attribute value definition"
 
 talvd "Tag attribute line value definition"
     = v: taivd _* & (eol / ')') { return v; }
-    / v: text_to_end {return {value: v, type: 'qouted'}; }
+    / v: text_to_end {return [{value: v, type: 'qouted'}]; }
 
 tais "Inline tag attribute seperator"
     = _* ','? _*

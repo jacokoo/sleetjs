@@ -51,7 +51,7 @@ exports.Tag = class Tag
                 predict = context.createPredict(item.predict.name, item, @)
                 predict.generate context
             else
-                @setAttribute item.name, item.value for item in item.attributes
+                @setAttribute i.name, i.value for i in item.attributes
 
         @generateAttribute item, context for item in @attributes
 
