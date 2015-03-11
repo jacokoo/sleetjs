@@ -1,5 +1,5 @@
 {
-  var IDT = 0,
+  var IDT = 0, i = 0, item,
       IDT_TOK = null,
       parents = [],
       parent = function() {return parents[parents.length - 1];};
@@ -15,20 +15,41 @@ start
 //////////////////////
 tags
     = start: tag rest: (tag_sep tag: tag { return tag; }) * {
-        return rest.unshift(start) && rest;
+        var tags = [];
+        rest.unshift(start);
+        for (i = 0; i < rest.length; i ++) {
+            item = rest[i];
+            tags.push(item);
+            if (item.inlineSiblings) tags = tags.concat(item.inlineSiblings);
+            delete item.inlineSiblings;
+        }
+        return tags;
     }
 
 tag
-    = parent: tag_parent children: tag_child* {
-        parent.children = (parent.children || []).concat(children);
-        return parent;
+    = p: tag_parent children: tag_child* {
+        p.inlineSiblings = p.inlineSiblings || [];
+        p.children = p.children || [];
+        for(i = 0; i < children.length; i ++) {
+            item = children[i];
+            (item.isInlineSibling ? p.inlineSiblings : p.children).push(item);
+            if (item.inlineSiblings) {
+                p.children = p.children.concat(item.inlineSiblings);
+            }
+            delete item.inlineSiblings;
+        }
+        return p;
     }
-    / parent: pipeline_parent children: pipeline_child* {
-        return children.unshift(parent) && children.join('\n');
-    }
-    / parent: comment_parent children: comment_child* {
+    / text: pipeline {
         return {
-            text: parent,
+            text: text,
+            name: '[TEXT]',
+            indent: IDT
+        };
+    }
+    / text: comment {
+        return {
+            text: text,
             name: '[COMMENT]',
             indent: IDT
         };
@@ -45,7 +66,12 @@ tag_child
     } tag: tag {
         return tag;
     }
-    / ':' _* tag: tag {
+    / _? '+' _* tag: tag {
+        tag.isInlineSibling = true;
+        return tag;
+    }
+    / _? [:>] _* tag: tag {
+        tag.isInlineChild = true;
         return tag;
     }
 
@@ -53,14 +79,19 @@ tag_def
     = tag_indent? name: identifier? clazz: tag_class* id: tag_id? clazz2: tag_class* & {
         return name || clazz.length > 0 || id || clazz2.length > 0
     } attrs: tag_attr_groups? text: (t: tag_text { return t; })? {
-        return {
+        var tag = {
             name: name,
             indent: IDT,
             dot: clazz.concat(clazz2),
             hash: id,
-            attributeGroups: attrs || [],
-            text: text
+            attributeGroups: attrs || []
         };
+        if (text) {
+            text.name = '[TEXT]';
+            text.indent = text.inline ? IDT : IDT + 1;
+            tag.children = [text];
+        }
+        return tag;
     }
 
 tag_class
@@ -130,7 +161,7 @@ tal "Tag attribute line"
 
 taid "Inline tag attribute definition"
     = name: tavd value: (_* '=' _* v: taivd { return v;})? {
-        return {name: name, value: value};
+        return {name: name, value: value || []};
     }
 
 takd "Tag attribute key definition"
@@ -151,7 +182,6 @@ taivd "Inline tag attribute value definition"
 talvd "Tag attribute line value definition"
     = v: taivd _* & (eol / ')') { return v; }
     / v: text_to_end {return {value: v, type: 'qouted'}; }
-
 
 tais "Inline tag attribute seperator"
     = _* ','? _*
@@ -176,10 +206,16 @@ ai "Attribute identifier"
 ////////////////////
 tag_text
     = '.' _* eol text: tag_text_lines {
-        return text;
+        return {
+            text: text,
+            inline: false
+        };
     }
-    / _ text: text_to_end {
-        return text;
+    / _ ! ([+>:]) text: text_to_end {
+        return {
+            text: [text],
+            inline: true
+        };
     }
 
 tag_text_lines
@@ -192,12 +228,12 @@ ttl "Tag text line"
         if (IDT_TOK === null) {
             IDT_TOK = indent.indexOf('\t') < 0 ? indent : '\t';
         }
-        return indent.length >= (IDT + 1) * (IDT_TOK || '').length;
+        return indent.length >= (IDT + 1) * IDT_TOK.length;
     } text: text_to_end {
-        return indent + text;
+        return indent.slice((IDT + 1) * IDT_TOK.length) + text;
     }
     / ws: $(w: _* & eol {return w;} ) {
-        return ws;
+        return ws.slice((IDT + 1) * IDT_TOK.length);
     }
 
 ttli "Tag text line indent"
@@ -211,36 +247,24 @@ ttli "Tag text line indent"
 ////////////////////
 // pipeline start //
 ////////////////////
-pipeline_parent
-    = text: pipeline {
-        return text;
-    }
-
-pipeline_child
-    = eol indent: pi & {
-        return indent === parent().indent + 1;
-    } text: pipeline_parent {
-        return text;
-    }
-
 pipeline
     = '|.' _* eol text: pipeline_lines {
         return text;
     }
     / '|' _? text: text_to_end {
-        return text;
+        return [text];
     }
 
 pipeline_lines
     = first: pll rest: (eol l: pll { return l; })* {
-        return rest.unshift(first) && rest.join('\n');
+        return rest.unshift(first) && rest;
     }
 
 pll
     = indent: pi & {
         return indent.length >= (IDT + 1) * IDT_TOK.length;
     } text: text_to_end {
-        return indent.slice(IDT_TOK.length) + text;
+        return indent.slice((IDT + 1) * IDT_TOK.length) + text;
     }
     / ws: $(w: _* & eol { return w; } ) {
         return ws;
@@ -258,23 +282,11 @@ pi "Pipeline indent"
 ///////////////////
 // comment start //
 ///////////////////
-comment_parent
-    = text: comment {
-        return text;
-    }
-
-comment_child
-    = eol indent: ci & {
-        return indent === parent().indent + 1;
-    } text: pipeline_parent {
-        return text;
-    }
-
 comment
     = '#.' _* eol text: comment_lines {
         return text;
     }
-    / '#' _+ text: text_to_end {
+    / '#' _ text: text_to_end {
         return text;
     }
 
@@ -287,7 +299,7 @@ cll
     = indent: ci & {
         return indent.length >= (IDT + 1) * IDT_TOK.length;
     } text: text_to_end {
-        return indent + text;
+        return indent.slice((IDT + 1) * IDT_TOK.length) + text;
     }
     / ws: $(w: _* & eol { return w; } ) {
         return ws;
