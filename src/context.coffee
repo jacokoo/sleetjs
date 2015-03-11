@@ -45,7 +45,9 @@ exports.Context = class Context
         idt
 
     indent: (level) ->
-        @result.push @getIndent(level)
+        @indented = true
+        idt = @getIndent level
+        @result.push idt if idt.length > 0
         @
 
     eol: ->
@@ -68,4 +70,6 @@ exports.Context = class Context
             tag = @createTag item, options: children: tags
             tag.generate @
 
-    getOutput: -> @result.join ''
+    getOutput: ->
+        @result.shift() if not @parent and @result[0] is '\n'
+        @result.join ''

@@ -36,6 +36,7 @@ tag
             if (item.inlineSiblings) {
                 p.children = p.children.concat(item.inlineSiblings);
             }
+            if (item.isInlineChild) p.haveInlineChild = item.isInlineChild;
             delete item.inlineSiblings;
         }
         return p;
@@ -48,11 +49,9 @@ tag
         };
     }
     / text: comment {
-        return {
-            text: text,
-            name: '[COMMENT]',
-            indent: IDT
-        };
+        text.name = '[COMMENT]';
+        text.indent = IDT;
+        return text;
     }
 
 tag_parent
@@ -207,8 +206,7 @@ ai "Attribute identifier"
 tag_text
     = '.' _* eol text: tag_text_lines {
         return {
-            text: text,
-            inline: false
+            text: text
         };
     }
     / _ ! ([+>:]) text: text_to_end {
@@ -284,10 +282,12 @@ pi "Pipeline indent"
 ///////////////////
 comment
     = '#.' _* eol text: comment_lines {
-        return text;
+        return {
+          text: text,
+        };
     }
     / '#' _ text: text_to_end {
-        return text;
+        return { text: [text], inline: true };
     }
 
 comment_lines
@@ -297,6 +297,9 @@ comment_lines
 
 cll
     = indent: ci & {
+        if (IDT_TOK === null) {
+            IDT_TOK = indent.indexOf('\t') < 0 ? indent : '\t';
+        }
         return indent.length >= (IDT + 1) * IDT_TOK.length;
     } text: text_to_end {
         return indent.slice((IDT + 1) * IDT_TOK.length) + text;

@@ -10,15 +10,8 @@ TYPES =
     'basic': '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML Basic 1.1//EN" "http://www.w3.org/TR/xhtml-basic/xhtml-basic11.dtd">'
     'mobile': '<!DOCTYPE html PUBLIC "-//WAPFORUM//DTD XHTML Mobile 1.2//EN" "http://www.openmobilealliance.org/tech/DTD/xhtml-mobile12.dtd">'
 
-
 exports.Doctype = class Doctype extends Tag
     generate: (context) ->
-        for item in @attributeGroups
-            @setAttribute key, value for key, value of item.attributes
-
-        type = @content
-        unless type
-            type = key for key, value of @attributes when value is null
-        type or = 'html'
-
-        context.push(TYPES[type] or TYPES.html).eol()
+        context.indent(@indent).eol()
+        type = @content or 'html'
+        context.push(TYPES[type] or TYPES.html)

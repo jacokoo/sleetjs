@@ -10,6 +10,8 @@ parser = require './parser'
 {Markdown} = require './tags/transformers/markdown'
 {Transformer} = require './tags/transformers/transformer'
 {Comment} = require './tags/comment'
+{Text} = require './tags/text'
+{Echo} = require './tags/echo'
 
 emptyTags = [
     'area', 'base', 'br', 'col', 'command'
@@ -24,6 +26,8 @@ defaultTags =
     markdown: Markdown
     '[COMMENT]': Comment
     '@include': Include
+    '[TEXT]': Text
+    echo: Echo
 
 compile = (input, options = {}) ->
     try

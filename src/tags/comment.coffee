@@ -2,14 +2,25 @@
 
 exports.Comment = class Comment extends Tag
     constructor: (@options, @parent = {}) ->
-        @content = @options.text or ''
+        @content = @options.text
         @indent = @options.indent or 0
 
     generate: (context) ->
-        context.indent(@indent)
+        @childrenContext = context.sub()
+
+        @generateOpenStart context
+        @generateContent @childrenContext
+        context.push @childrenContext.getOutput()
+
+        @generateClose context
+
+    generateTagStart: (context) ->
         context.push('<!--')
-        if @isArray(@content)
-            context.eol().push(@content.join('\n')).eol()
-            context.indent(@indent).push('-->').eol()
-        else
-            context.push(' ').push(@content).push(' -->').eol()
+
+    generateTagEnd: (context) ->
+        context.push '-->'
+
+    generateContent: (context) ->
+        for item in @content
+            context.eol().indent(@indent + 1) unless @options.inline
+            context.push(item)
