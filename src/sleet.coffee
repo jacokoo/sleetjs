@@ -60,3 +60,4 @@ module.exports =
     EmptyTag: EmptyTag
     Predict: Predict
     Transformer: Transformer
+    Echo: Echo
