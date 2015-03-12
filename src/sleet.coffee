@@ -12,6 +12,8 @@ parser = require './parser'
 {Comment} = require './tags/comment'
 {Text} = require './tags/text'
 {Echo} = require './tags/echo'
+{Ieif} = require './tags/ieif'
+{AtIeif} = require './tags/at-ieif'
 
 emptyTags = [
     'area', 'base', 'br', 'col', 'command'
@@ -28,6 +30,8 @@ defaultTags =
     '@include': Include
     '[TEXT]': Text
     echo: Echo
+    ieif: Ieif
+    '@ieif': AtIeif
 
 compile = (input, options = {}) ->
     try
