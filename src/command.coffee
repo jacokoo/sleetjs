@@ -148,7 +148,7 @@ compileIt = (input, out, options) ->
     try
         output = compile content, opt
     catch e
-        return console.error e
+        return console.log e.stack
 
     o = opt.transform?(output, input, out)
     o or= output

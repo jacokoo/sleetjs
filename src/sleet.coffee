@@ -14,6 +14,8 @@ parser = require './parser'
 {Echo} = require './tags/echo'
 {Ieif} = require './tags/ieif'
 {AtIeif} = require './tags/at-ieif'
+{BlockDefinition} = require './tags/block-def'
+{BlockReference} = require './tags/block-ref'
 
 emptyTags = [
     'area', 'base', 'br', 'col', 'command'
@@ -32,6 +34,8 @@ defaultTags =
     echo: Echo
     ieif: Ieif
     '@ieif': AtIeif
+    block: BlockReference
+    '@block': BlockDefinition
 
 compile = (input, options = {}) ->
     try
@@ -65,3 +69,5 @@ module.exports =
     Predict: Predict
     Transformer: Transformer
     Echo: Echo
+    BlockDefinition: BlockDefinition
+    BlockReference: BlockReference

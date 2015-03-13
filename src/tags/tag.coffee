@@ -9,9 +9,9 @@ exports.Tag = class Tag
         @indent = @options.indent or 0
 
         @setAttribute('id', @options.hash) if @options.hash
-        @setAttribute('class', dot) for dot in @options.dot
-        @attributeGroups = @options.attributeGroups
-        @children = @options.children
+        @setAttribute('class', dot) for dot in @options.dot or []
+        @attributeGroups = @options.attributeGroups or []
+        @children = @options.children or []
 
     isString: isString
     isArray: isArray

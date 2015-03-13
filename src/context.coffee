@@ -17,6 +17,10 @@ exports.Context = class Context
         if @parent then @parent.registerPredict name, clazz else @predictTypes[name] = clazz
         @
 
+    registerBlock: (name, block) ->
+        if @parent then @parent.registerBlock(name, block) else @blocks[name] = block
+        @
+
     createTag: (options, parent) ->
         return @parent.createTag options, parent if @parent
 
@@ -30,10 +34,18 @@ exports.Context = class Context
         clazz = @predictTypes[name] or @defaultPredict
         new clazz(options, tag)
 
+    getBlock: (name) ->
+        return @parent.getBlock(name) if @parent
+
+        block = @blocks[name]
+        throw new Error("Block #{name} is not defined") unless block
+        block
+
     constructor: (@options = {}, @indentToken = '  ', @newlineToken = '\n', @defaultLevel = 0, @parent) ->
         @result = []
         @tagTypes = {}
         @predictTypes = {}
+        @blocks = {}
 
     sub: (level) ->
         sub = new Context(@options, @indentToken, @newlineToken, level or @defaultLevel, @)
