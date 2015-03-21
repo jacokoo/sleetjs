@@ -394,7 +394,7 @@ number_def
     }
 
 int
-    = [1-9] [0-9]*
+    = [1-9] [0-9]* / '0'
 
 exponent
     = 'e'i [+-]? int
