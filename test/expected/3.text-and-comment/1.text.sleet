@@ -1,0 +1,29 @@
+a any text
+a  inline text with heading whitespace
+b.
+    this
+     is
+      a
+
+    text
+      block
+c
+    | pipeline
+
+    | text
+d
+    |.
+        this
+          is
+         a
+            pipeline
+           text
+               block
+
+combined inline text
+    | pipeline text
+    |.
+        pipeline
+        block
+
+    | another pipeline text

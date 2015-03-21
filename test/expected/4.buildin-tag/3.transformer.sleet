@@ -1,0 +1,25 @@
+script: coffee.
+    console.log item for item in [0...10] when item % 2 is 0
+
+script: coffee(bare=true).
+    console.log item for item in [0...10] when item % 2 is 0
+
+script: uglify: coffee.
+    console.log item for item in [0...10] when item % 2 is 0
+
+script
+    uglify
+        coffee.
+            console.log item for item in [0...10] when item % 2 is 0
+
+markdown.
+    # title
+    ## sub title
+    * foo
+    * bar
+    * baz
+
+    ### sub title
+    1. foo
+    2. bar
+    3. baz

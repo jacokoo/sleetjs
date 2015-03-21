@@ -19,14 +19,22 @@
     "yargs": "^2.3.0"
   },
   "devDependencies": {
+    "chai": "^2.1.2",
     "coffee-script": "^1.9.0",
     "gulp": "^3.8.11",
     "gulp-clean": "^0.3.1",
     "gulp-coffee": "^2.3.1",
     "gulp-coffeelint": "^0.4.0",
+    "gulp-mocha": "^2.0.0",
     "gulp-peg": "^0.1.2",
     "gulp-template": "^3.0.0",
     "gulp-uglify": "^1.1.0",
+    "mocha": "^2.2.1",
     "pegjs": "^0.8.0"
+  },
+  "scripts": {
+    "pretest": "coffee -c test",
+    "test": "mocha --ui bdd",
+    "posttest": "find test -name \"*.js\" -delete"
   }
 }

@@ -1,0 +1,14 @@
+#id
+.class
+a#id
+a.class
+a.class1.class2.class3
+a#id.class1.class2.class3
+a.class1#id.class2.class3
+a.class1.class2#id.class3
+a.class1.class2.class3#id
+a.$._.@
+a#$
+a#_
+a#@
+a.col-md-3.col-xs-12

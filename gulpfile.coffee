@@ -6,6 +6,7 @@ coffee = require 'gulp-coffee'
 coffeelint = require 'gulp-coffeelint'
 uglify = require 'gulp-uglify'
 template = require 'gulp-template'
+mocha = require 'gulp-mocha'
 
 gulp.task 'clean', ->
     gulp.src 'lib', read: false
@@ -28,5 +29,9 @@ gulp.task 'build', ['coffee'], ->
     gulp.src 'lib/**/*.js'
         .pipe uglify()
         .pipe gulp.dest 'lib'
+
+gulp.task 'test', ->
+    gulp.src 'test/*.coffee', read: false
+        .pipe mocha()
 
 gulp.task 'default', ['build']

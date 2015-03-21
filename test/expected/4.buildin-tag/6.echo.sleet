@@ -1,0 +1,14 @@
+echo(e) + echo(c) + echo(h) + echo(o)
+
+a: echo(text)
+p text
+    a text
+p
+    echo('remove text before tag a') + a text
+    echo('TODO: provide a way to remove text')
+    echo('after tag a')
+p
+    echo(text = abc)
+    echo(
+        text = this is a text line
+    )

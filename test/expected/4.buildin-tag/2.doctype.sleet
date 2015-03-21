@@ -1,0 +1,11 @@
+doctype
+doctype(html)
+doctype(xml)
+doctype(transitional)
+doctype(strict)
+doctype(frameset)
+doctype(1.1)
+doctype(basic)
+doctype(mobile)
+doctype('HTML')
+doctype('http://something-else.com')

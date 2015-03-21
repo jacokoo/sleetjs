@@ -1,0 +1,2 @@
+a(a=1 b=2)&if(any thing you like)
+a(a=1)&p(a)(b=2)&d(a)

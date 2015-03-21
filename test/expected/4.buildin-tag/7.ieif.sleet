@@ -1,0 +1,14 @@
+ieif('lt IE 7') <html class="no-js lt-ie9 lt-ie8 lt-ie7">
+ieif('IE 7') <html class="no-js lt-ie9 lt-ie8">
+ieif('IE 8') <html class="no-js lt-ie9">
+@ieif('gt IE 8') <html class="no-js">
+
+body
+    ieif('lt IE 8'): script(src=hello.js)
+    @ieif('gte IE 8')
+        script(src=script.js)
+    p.
+        TODO provide a way to use conditional comment
+        to surround a start tag only
+
+echo('</html>')

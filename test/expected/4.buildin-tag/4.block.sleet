@@ -1,0 +1,17 @@
+@include ../../include/block.sleet
+
+@block#demo(name='username' type='text')
+    input(name=$name type=$type)
+
+@block#foo(a=a b=b)
+    div(id=$a) in text $b
+
+block#include
+block#include(id='hello')
+form#form
+    block#demo
+    block#demo(name='password' type='password')
+    .row
+        block#demo
+        block#foo
+        block#foo(a=id)

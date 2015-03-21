@@ -1,0 +1,30 @@
+area
+base
+br
+col
+command
+embed
+hr
+img
+input
+keygen
+link
+meta
+param
+source
+track
+wbr
+img(self-closing=with-attributes)(src=image.jpg)
+img#hash.dot
+img inline text are all ignored
+img.
+    text block is ignored
+img
+    | pipeline text is ignored
+    |.
+        pipeline block is ignored
+img
+    all
+        children
+            are
+        ignored
