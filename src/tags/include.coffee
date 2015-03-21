@@ -9,12 +9,13 @@ exports.Include = class Include extends Tag
         filename = context.options.filename or path.resolve('.')
         filename = path.dirname(filename) if fs.statSync(filename).isFile()
         file = path.resolve(filename, file)
-
         code = fs.readFileSync(file, 'utf8')
+
+        context.indent(0) # make context indented
         sub = context.sub(@indent)
         {tags} = parse(code)
         sub.generate(tags)
-        context.push sub.getOutput()
+        sub.merge()
 
     getContent: ->
         return '' if @children.length isnt 1

@@ -51,6 +51,11 @@ exports.Context = class Context
         sub = new Context(@options, @indentToken, @newlineToken, level or @defaultLevel, @)
         sub
 
+    merge: ->
+        return @ unless @parent
+        @parent.result = @parent.result.concat @result
+        @
+
     getIndent: (level) ->
         idt = ''
         idt += @indentToken for i in [0...level + @defaultLevel]
@@ -76,6 +81,9 @@ exports.Context = class Context
 
     last: (length) ->
         @result.slice -length
+
+    isEmpty: ->
+        @result.length is 0 and (if @parent then @parent.isEmpty() else true)
 
     generate: (tags) ->
         for item in tags

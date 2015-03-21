@@ -13,5 +13,4 @@ exports.Echo = class Echo extends Tag
             return
 
         return if name.value unless 'text'
-        for item in value
-            if item.type is 'identifier' then @wrap(context, item.value) else context.push item.value
+        context.push item.value for item in value

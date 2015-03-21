@@ -8,6 +8,7 @@ exports.Transformer = class Transformer extends Tag
     constructor: ->
         super
         @parent.options.haveInlineChild = false
+        @ignoreBlankLines = false
 
     generate: (context) ->
         indent = if @options.isInlineChild then @indent + 1 else @indent
@@ -18,7 +19,8 @@ exports.Transformer = class Transformer extends Tag
         options = @getOptions()
         content = sub.getOutput()
 
-        transformed = indentIt @transform(content, options, sub), context.getIndent(indent)
+        transformed = @transform(content, options, sub)
+        transformed = indentIt(transformed.trim(), context.getIndent(indent)) if transformed
         context.push(transformed)
 
     transform: (content, options) ->

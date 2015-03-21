@@ -7,5 +7,6 @@ exports.Text = class Text extends Tag
 
     generate: (context) ->
         for item in @content
+            continue if not item and @parent.ignoreBlankLines isnt false
             context.eol().indent(@indent) unless @options.inline
             context.push(item)

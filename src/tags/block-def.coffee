@@ -18,6 +18,7 @@ exports.BlockDefinition = class BlockDefinition extends Tag
         @attributes = @getAttributes(context, @attributeGroup)
 
     generateBlock: (context, block) ->
+        context.indent(0) # make context indented
         sub = context.sub(block.indent - 1)
         sub.createTag(item, @).generate(sub) for item in @options.children
         content = sub.getOutput()
@@ -27,6 +28,8 @@ exports.BlockDefinition = class BlockDefinition extends Tag
         merged[key] = attributes[key] or value for key, value of @attributes
 
         content = @processReplacement(content, merged)
+        if context.isEmpty() and content.charAt(0) is '\n'
+            content = content.slice 1
         context.push content
 
     getAttributes: (context, attributeGroup) ->

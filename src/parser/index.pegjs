@@ -34,7 +34,11 @@ tag
             item = children[i];
             (item.isInlineSibling ? p.inlineSiblings : p.children).push(item);
             if (item.inlineSiblings) {
-                p.children = p.children.concat(item.inlineSiblings);
+                if (item.isInlineSibling) {
+                    p.inlineSiblings = p.inlineSiblings.concat(item.inlineSiblings);
+                } else {
+                    p.children = p.children.concat(item.inlineSiblings);
+                }
             }
             if (item.isInlineChild) p.haveInlineChild = item.isInlineChild;
             delete item.inlineSiblings;

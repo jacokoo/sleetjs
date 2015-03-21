@@ -13,5 +13,13 @@ TYPES =
 exports.Doctype = class Doctype extends Tag
     generate: (context) ->
         context.indent(@indent).eol()
-        type = @content or 'html'
-        context.push(TYPES[type] or TYPES.html)
+        if @attributeGroups.length is 0
+            content = TYPES.html
+        else
+            attr = @attributeGroups[0].attributes[0]
+            name = attr.name
+            if name.type is 'quoted'
+                content = "<!DOCTYPE #{name.value}>"
+            else
+                content = TYPES[name.value]
+        context.push(content)

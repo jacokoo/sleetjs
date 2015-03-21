@@ -16,11 +16,13 @@ exports.Comment = class Comment extends Tag
 
     generateTagStart: (context) ->
         context.push('<!--')
+        context.push ' ' if @options.inline
 
     generateTagEnd: (context) ->
+        context.push ' ' if @options.inline
         context.push '-->'
 
     generateContent: (context) ->
-        for item in @content
+        for item in @content when item
             context.eol().indent(@indent + 1) unless @options.inline
             context.push(item)
