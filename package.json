@@ -34,7 +34,7 @@
   },
   "scripts": {
     "pretest": "coffee -c test",
-    "test": "mocha --ui bdd",
+    "test": "mocha --ui bdd test/ test/ast/",
     "posttest": "find test -name \"*.js\" -delete"
   }
 }

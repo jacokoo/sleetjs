@@ -31,7 +31,7 @@ gulp.task 'build', ['coffee'], ->
         .pipe gulp.dest 'lib'
 
 gulp.task 'test', ->
-    gulp.src 'test/*.coffee', read: false
+    gulp.src 'test/**/*.coffee', read: false
         .pipe mocha()
 
 gulp.task 'default', ['build']

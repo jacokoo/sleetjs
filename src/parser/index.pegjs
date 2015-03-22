@@ -6,8 +6,8 @@
 }
 
 start
-    = blank_line* tags: tags blank_line* _* {
-        return {tags: tags, indent: IDT_TOK};
+    = blank_line* tags: tags? blank_line* _* {
+        return {tags: tags || [], indent: IDT_TOK};
     }
 
 //////////////////////
@@ -81,7 +81,7 @@ tag_child
 tag_def
     = tag_indent? name: identifier? clazz: tag_class* id: tag_id? clazz2: tag_class* & {
         return name || clazz.length > 0 || id || clazz2.length > 0
-    } attrs: tag_attr_groups? text: (t: tag_text { return t; })? {
+    } attrs: tag_attr_groups? text: tag_text? {
         var tag = {
             name: name,
             indent: IDT,
@@ -371,7 +371,7 @@ sqs "Single quoted string char"
 ec "Escaped char"
     = '0' ![0-9] { return '\0' }
     / '"' / "'" / '\\'
-    / c: [bnfrt] { return '\\' + c; }
+    / c: [nfrt] { return '\\' + c; }
     / 'b' { return '\x0B' }
 
 boolean
