@@ -6,9 +6,31 @@
 }
 
 start
-    = blank_line* tags: tags? blank_line* _* {
-        return {tags: tags || [], indent: IDT_TOK};
+    = declare: declare_line? blank_line* tags: tags? blank_line* _* {
+        return {tags: tags || [], indent: IDT_TOK, declaration: declare};
     }
+
+////////////////////////
+// declare line start //
+////////////////////////
+declare_line
+    = '#!' name: identifier
+      ext: (_+ i: identifier {return i;})?
+      attr:(_+ kv: key_value_pair {return kv})* eol {
+        var result = {};
+        for (i = 0; i < attr.length; i ++ ) {
+            result[attr[i].key] = attr[i].value;
+        }
+        return {name: name, ext: ext, options: result}
+    }
+
+key_value_pair
+    = key: identifier _* '=' _* value: $(!(_ / eol) .)* {
+        return {key: key, value: value};
+    }
+//////////////////////
+// declare line end //
+//////////////////////
 
 //////////////////////
 // tag itself start //
