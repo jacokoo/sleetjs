@@ -15,6 +15,14 @@ However, you can override tags to generate a output file that can be used to
 render data with a template engine.
 
 
+## Resources
+* [Sleet-Handlebars](https://github.com/JacoKoo/sleet-handlebars) A sleet extension that compiles Sleet file to Handlebars template.
+* [Atom-Sleet](https://github.com/JacoKoo/atom-sleet) Sleet and Sleet Handlebars plugin(Syntax highlight, Compile on save, Preview) for [Atom](https://atom.io).
+* [Handlebars-Sleet](https://github.com/JacoKoo/handlebars-sleet) Convert exist HTML / HBS(Handlebars template) files to Sleet
+
+## Screenshot
+![Screenshot](https://raw.githubusercontent.com/JacoKoo/atom-sleet/master/screenshot.jpg)
+
 ## Installation
 Make sure you have npm installed, then
 
@@ -148,16 +156,21 @@ compiles to
 </div>
 ```
 
-Inline tag could save indents.
+### Inline Tag
+Inline tag could save indents. There are two types of inline tag: inline child(>) and inline sibling(+).
 
 ```
 .container
-    div: #id: p text
+    div > #id > p text
+    #a1 + #a2
+    div > #a1 + #a2
 ```
 compiles to
 ```html
 <div class="container">
     <div><div id="id"><p>text</p></div></div>
+    <div id="a1"></div><div id="a2"></div>
+    <div><div id="a1"></div><div id="a2"></div></div>
 </div>
 ```
 
@@ -261,9 +274,9 @@ p
 compiles to
 ```html
 <p>
-pipeline
-text
-multiple lines
+    pipeline
+    text
+    multiple lines
     <div class="child-of-p"></div>
     <a>
         pipeline
@@ -313,35 +326,35 @@ All these tags are self-closing tag
 ```
 
 #### Doctype
-doctype html
+doctype(html)
 ```
 <!DOCTYPE html>
 ```
-doctype xml
+doctype(xml)
 ```
 <?xml version="1.0" encoding="utf-8" ?>
 ```
-doctype transitional
+doctype(transitional)
 ```
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 ```
-doctype strict
+doctype(strict)
 ```
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 ```
-doctype frameset
+doctype(frameset)
 ```
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Frameset//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-frameset.dtd">
 ```
-doctype 1.1
+doctype(1.1)
 ```
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 ```
-doctype basic
+doctype(basic)
 ```
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML Basic 1.1//EN" "http://www.w3.org/TR/xhtml-basic/xhtml-basic11.dtd">
 ```
-doctype mobile
+doctype(mobile)
 ```
 <!DOCTYPE html PUBLIC "-//WAPFORUM//DTD XHTML Mobile 1.2//EN" "http://www.openmobilealliance.org/tech/DTD/xhtml-mobile12.dtd">
 ```
