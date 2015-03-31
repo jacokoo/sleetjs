@@ -314,6 +314,21 @@ compiles to
 </div>
 ```
 
+### IE Conditional Comments
+There is a buildin tag `ieif` to support Internet Explorer conditional comment
+```sleet
+ieif('lt IE 8'): script(src=hello.js)
+@ieif('gte IE 8')
+    script(src=script.js)
+```
+compiles to
+```html
+<!--[if lt IE 8]><script src="hello.js"></script><![endif]-->
+<!--[if gte IE 8]><!-->
+    <script src="script.js"></script>
+<!--<![endif]-->
+```
+
 ### Buildin Tags
 These tags are extended by default.
 
