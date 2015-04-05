@@ -1,7 +1,7 @@
 ```
-   _____ _           _          _     
-  / ____| |         | |        | |    
- | (___ | | ___  ___| |_       | |___ 
+   _____ _           _          _
+  / ____| |         | |        | |
+ | (___ | | ___  ___| |_       | |___
   \___ \| |/ _ \/ _ \ __|  _   | / __|
   ____) | |  __/  __/ |_  | |__| \__ \
  |_____/|_|\___|\___|\__|  \____/|___/
@@ -52,7 +52,7 @@ The option `-o, --output` is used to specify out folder. Any file inputs will be
 placed in the destination folder flatly. And directory inputs will keep the sub
 directory structure.
 
-#### examples:
+#### examples
 - Compile a directory tree of `.sleet` files in `src` into a parallel tree of
 `.html` files in `dest`
 
@@ -78,12 +78,12 @@ html
         meta(charset='utf-8')
         title Welcom to Sleetjs
         link(rel='stylesheet' href='index.css')
-        script(type='text/javascript'): uglify: coffee(bare=true).
+        script(type='text/javascript') > uglify > coffee(bare=true).
             number = 2
             square = (x) -> x * x
             console.log square number
     body
-        .container: p.
+        .container > p.
             This
             is
             a text block
@@ -317,7 +317,7 @@ compiles to
 ### IE Conditional Comments
 There is a buildin tag `ieif` to support Internet Explorer conditional comment
 ```sleet
-ieif('lt IE 8'): script(src=hello.js)
+ieif('lt IE 8') > script(src=hello.js)
 @ieif('gte IE 8')
     script(src=script.js)
 ```
@@ -465,7 +465,7 @@ compiles to
 
 or you can combine them
 ```
-script: uglify: coffee.
+script > uglify > coffee.
     foods = ['broccoli', 'spinach', 'chocolate']
     eat food for food in foods when food isnt 'chocolate'
 ```
@@ -478,7 +478,7 @@ compiles to
 
 ##### Markdown
 ```
-html: body: markdown.
+html > body > markdown.
     # Sleetjs
     Sleetjs is a litte indent-based language that compiles into HTML/XML.
 ```
