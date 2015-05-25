@@ -8,40 +8,45 @@
 ```
 
 # Sleetjs
-Sleetjs is a litte indent-based language that compiles into HTML/XML.
+Sleetjs 是一种把代码编译成 HTML/XML 的语言
 
-It is not a template engine , so it can't render data.
-However, you can override tags to generate a output file that can be used to
-render data with a template engine.
+它不是一个模板引擎(像Jade那样), 所以它不能渲染数据.
+但是你可以扩展一些标记(Tag), 使的编译出来的HTML中包含一些模板引擎需要的标记(如: {{#if}} <% if %>等),
+使的它可以用模板引擎来渲染数据.
 
+## 相关资源
+* [Sleet-Handlebars](https://github.com/JacoKoo/sleet-handlebars) Sleet 的一个扩展，
+  用于把 Sleet 代码编译成 Handlebars 模板
+* [Atom-Sleet](https://github.com/JacoKoo/atom-sleet) Sleet 与 Sleet-Handlebars 在
+  [Atom](https://atom.io) 编辑器里的插件(包括语法高亮、保存时编译、预览等功能)
+* [Handlebars-Sleet](https://github.com/JacoKoo/handlebars-sleet) 用于把已有的
+  HTML/HBS(Handlebars 模板) 转换成 Sleet 文件
 
-[中文文档](https://github.com/JacoKoo/sleetjs/blob/master/README.cn.md)
-
-## Resources
-* [Sleet-Handlebars](https://github.com/JacoKoo/sleet-handlebars) A sleet extension that compiles Sleet file to Handlebars template.
-* [Atom-Sleet](https://github.com/JacoKoo/atom-sleet) Sleet and Sleet Handlebars plugin(Syntax highlight, Compile on save, Preview) for [Atom](https://atom.io).
-* [Handlebars-Sleet](https://github.com/JacoKoo/handlebars-sleet) Convert exist HTML / HBS(Handlebars template) files to Sleet
-
-## Screenshot
+## 截图
 ![Screenshot](https://raw.githubusercontent.com/JacoKoo/atom-sleet/master/screenshot.jpg)
 
-## Installation
-Make sure you have npm installed, then
+## 安装
+安装前请确认你已经安装了 `npm`
 
-    $ npm install -g sleet
+```
+$ npm install -g sleet
+```
 
-## Command line usage
+## 命令行用法
 
-    $ sleet [options] input1 [input2...]
+```
+$ sleet [options] input1 [input2...]
+```
 
-Sleet compiles input files to html/xml files. It can take multiple inputs,
-either file or directory. For the directory input, it will scan the directory
-recursively to find these files whose extension is `.sleet` and compile them.
+Sleet 命令把输入方法编译成 html/xml 文件, 它可以同时处理多个输入文件或目录.
+当指定目录时, 它会扫描指定目录与指定目录的所有子孙目录, 找出所有以 `.sleet`为扩展名的文件,
+并编译它们.
 
+```
 $ sleet -h
 /usr/local/bin/sleet [options] input.st [input2.st...]
 
-```
+
 Options:
 -o, --output     The output directory
 -e, --extension  The file extension of output file
@@ -50,28 +55,28 @@ Options:
 -h, --help       Show this message
 ```
 
-The option `-o, --output` is used to specify out folder. Any file inputs will be
-placed in the destination folder flatly. And directory inputs will keep the sub
-directory structure.
+`-o, --output` 用来指定输出目录. 所有的输入文件都会把编译后的文件放到相应的输出目录中.
 
-#### examples
-- Compile a directory tree of `.sleet` files in `src` into a parallel tree of
-`.html` files in `dest`
+#### 使用举例
+- 把 `src` 目录中的所有 `.sleet` 文件编译到 `dest` 目录的相对应的位置
 
         $ sleet src/ -o dest/
 
-- Compile files into `.tag` files
+- 指定输出文件的扩展名为 `.tag`
 
         $ sleet src/ -o dest/ -e tag
 
-- Watch for changes, and compile file every time it is saved
+- 监视 `src` 目录中的文件, 如果有修改的话, 就把修改过的文件编译到 `dest` 目录的对应位置
 
         $ sleet src/ -o dest/ -w
 
-## Grammar
-Sleet is indent based, it checks indent strictly. You can indent with any number
-of `spaces` or a single `tab` character. But you have to keep consistent within
-a given file.
+## 语法
+Sleet 是严格基于缩进的语言. 缩进相等的相邻标记为兄弟标记，缩进大的的标记是缩进小的标记的子孙标记.
+
+一个缩进可以是任意多个空格或者一个tab符, 唯一的规则是, 你的所有缩进都要跟你一个缩进一样.
+
+例如你的第一个缩进是4个空格, 那接下来所有的缩进都应该是4个空格的倍数, 否则会编译错误.
+
 
 ```
 doctype html
@@ -93,7 +98,7 @@ html
             p The end
 ```
 
-compiles to:
+会编译为:
 ```html
 <!DOCTYPE html>
 <html>
@@ -118,18 +123,17 @@ compiles to:
 </html>
 ```
 
-### Tag
-The first character of a tag name can be `[a-zA-Z$@_]` and the rest can be
-`[a-zA-Z0-9$_-]`.
+### 标记(Tag)
+标记名的第一个字符可以是: `[a-zA-Z$@_]`, 后面的字符可以为: `[a-zA-Z0-9$_-]`.
 
+例如:
 ```
 html
     @at1
     $dollar2
     _underscore3
 ```
-
-compiles to
+会编译为:
 ```html
 <html>
     <@at1></@at1>
@@ -138,8 +142,7 @@ compiles to
 </html>
 ```
 
-Tag name, class literal, id literal are all optional. But you should specify one
-of these at least.
+标记名、类选择器、ID选择器都是可选的，但至少要提供其中一个。
 
 ```
 #id
@@ -148,7 +151,7 @@ of these at least.
     .class3#id3.class4
     a#id3.class5
 ```
-compiles to
+会编译为：
 ```html
 <div id="id">
     <div class="class"></div>
@@ -158,8 +161,11 @@ compiles to
 </div>
 ```
 
-### Inline Tag
-Inline tag could save indents. There are two types of inline tag: inline child(>) and inline sibling(+).
+### 行内标记(Inline Tag)
+用行内标记可以节省缩进。
+
+有两种行内标记，分别是：行内子标记(>)、行内兄弟标记(+)
+
 
 ```
 .container
@@ -167,7 +173,7 @@ Inline tag could save indents. There are two types of inline tag: inline child(>
     #a1 + #a2
     div > #a1 + #a2
 ```
-compiles to
+会编译为:
 ```html
 <div class="container">
     <div><div id="id"><p>text</p></div></div>
@@ -176,29 +182,28 @@ compiles to
 </div>
 ```
 
-### Attribute
-A tag can have multiple attribute groups.
+### 属性
+一个标记可以有多个属性组
 
 ```
 a.btn(href="#index")(class='btn-default') btn
 ```
-compiles to
+会编译为：
 ```html
 <a class="btn btn-default" href="#index">btn</a>
 ```
 
-If attribute value only contains `[a-zA-Z0-9$@_-]`, the quotes are optional.
+如果属性值只包含：`[a-zA-Z0-9$@_-]`, 那么引号是可以省略的
 
 ```
 a.btn(href="#index")(class=btn-default target=_blank) btn
 ```
-compiles to
+会编译为:
 ```html
 <a class="btn btn-default" href="#index" target="_blank">btn</a>
 ```
 
-Attribute groups could have multiple lines, each line present only one
-attribute. And quotes are optional.
+属性组可以包含多行，每一行代表一个属性，属性值的引号是可选的
 
 ```
 a#btn(
@@ -206,42 +211,42 @@ a#btn(
     class = btn btn-default and-something-else
 )(target=_blank) btn
 ```
-compiles to
+会编译为:
 ```html
 <a id="btn" href="#index" class="btn btn-default and-something-else" target="_blank">btn</a>
 ```
 
 
 
-__Each attribute group could have an attribute predict. But by default the
-predicts are all ignored. It just for extension.__
-For example, if you use `Handlebars` as template engine:
+__每一个属性组可以跟一个限定符，但默认实现中，这些限定符都被省略了。这个机制是给扩展用的__
+
+例如，如果你用`Handlebars`模板引擎的话，可以这么用：
 
 ```
 a(class=active)&if(data) text
 ```
-could be compiled to
+可以被编译为：
 ```html
 <a {{#if data}}class="active"{{/if}}>text</a>
 ```
 
-or if you use `underscore` like template engine, it could be compiled to
+而如果你用`underscore`的话，它可以被编译成:
 ```html
 <a <% if (data) { %>class="active"<% } %>>text</a>
 ```
 
-### Text
-Inline text
+### 文本
+行内文本
 
 ```
 p these are text
 ```
-compiles to
+编译为：
 ```html
 <p>these are text</p>
 ```
 
-Text block, a dot immediately after tag
+文本块，标记后面直接跟一个英文句号：
 
 ```
 p.
@@ -249,7 +254,7 @@ p.
         text block must
       equal or greater than parent's indent + 1
 ```
-compiles to
+编译为：
 ```html
 <p>
     the indent of
@@ -259,7 +264,7 @@ compiles to
 
 ```
 
-Pipeline text and pipeline text block
+管道(pipeline)文本与管道文本块：
 
 ```
 p
@@ -273,7 +278,7 @@ p
                 text block
         .child-of-a
 ```
-compiles to
+会编译成：
 ```html
 <p>
     pipeline
@@ -288,8 +293,8 @@ compiles to
 </p>
 ```
 
-### Comment
-Single line comment and comment block
+### 注释
+单行注释与多行注释
 
 ```
 # single line comment
@@ -301,7 +306,7 @@ Single line comment and comment block
     .row
         .col-md-12 text
 ```
-compiles to
+会编译为:
 ```html
 <!-- single line comment -->
 <div class="container">
@@ -317,13 +322,14 @@ compiles to
 ```
 
 ### IE Conditional Comments
-There is a buildin tag `ieif` to support Internet Explorer conditional comment
+在 Sleet 中，有一个内置标记 `ieif` 可以用来写 IE条件注释：
+
 ```sleet
 ieif('lt IE 8') > script(src=hello.js)
 @ieif('gte IE 8')
     script(src=script.js)
 ```
-compiles to
+编译为:
 ```html
 <!--[if lt IE 8]><script src="hello.js"></script><![endif]-->
 <!--[if gte IE 8]><!-->
@@ -331,18 +337,18 @@ compiles to
 <!--<![endif]-->
 ```
 
-### Buildin Tags
-These tags are extended by default.
+### 内置标记
+这些内置标记被增强用来实现一些具体功能
 
-#### Self-closing Tags
-All these tags are self-closing tag
+#### 自关闭标记(Self-closing)
+以下这些都是自关闭标记
 ```
 'area', 'base', 'br', 'col', 'command'
 'embed', 'hr', 'img', 'input', 'keygen'
 'link', 'meta', 'param', 'source', 'track', 'wbr'
 ```
 
-#### Doctype
+#### 文档类型(Doctype)
 doctype(html)
 ```
 <!DOCTYPE html>
@@ -377,7 +383,7 @@ doctype(mobile)
 ```
 
 #### @include
-@include is to include another sleet file into current file.
+@include 用来把另一个 sleet 文件引入到当前文件
 
 ```
 # a.sleet
@@ -393,7 +399,7 @@ doctype(mobile)
     .panel-body
         @include ./a.sleet
 ```
-compiles to
+会编译为:
 ```html
 <div class="panel panel-default">
     <div class="panel-heading">
@@ -408,20 +414,19 @@ compiles to
 </div>
 ```
 
-#### Transformers
-Transformers are used to transform text content to another format.
-`coffee`, `markdown`, `uglify` are supported by default. Make sure you
-have the corresponding lib installed to use them. `coffee` needs `coffee-script`,
-`markdown` needs `marked` and `uglify` needs `uglify-js`.
+#### 转换器(Transformers)
+转换器用来把内容转换为相应的格式。内置支持的转换器有：`coffee`, 'markdown', 'uglify'.
 
 ##### Coffee
+用来把 `coffee script` 编译为 `javascript` 代码
+
 ```
 script
     coffee.
         foods = ['broccoli', 'spinach', 'chocolate']
         eat food for food in foods when food isnt 'chocolate'
 ```
-compiles to
+会编译为:
 ```html
 <script>
     (function() {
@@ -458,20 +463,20 @@ script
 
         }).call(this);
 ```
-compiles to
+编译为:
 ```html
 <script>
     (function(){var c,o,a,l;for(o=["broccoli","spinach","chocolate"],a=0,l=o.length;l>a;a++)c=o[a],"chocolate"!==c&&eat(c)}).call(this);
 </script>
 ```
 
-or you can combine them
+你可以把它他组合起来使用:
 ```
 script > uglify > coffee.
     foods = ['broccoli', 'spinach', 'chocolate']
     eat food for food in foods when food isnt 'chocolate'
 ```
-compiles to
+编译为：
 ```html
 <script>
     (function(){var c,o,a,l;for(o=["broccoli","spinach","chocolate"],a=0,l=o.length;l>a;a++)c=o[a],"chocolate"!==c&&eat(c)}).call(this);
@@ -484,7 +489,7 @@ html > body > markdown.
     # Sleetjs
     Sleetjs is a litte indent-based language that compiles into HTML/XML.
 ```
-compiles to
+编译为：
 ```html
 <html><body>
     <h1 id="sleetjs">Sleetjs</h1>
