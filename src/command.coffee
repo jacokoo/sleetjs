@@ -3,30 +3,25 @@ path = require 'path'
 {compile} = require './sleet'
 
 SLEET_FILE = '.sleet'
-DEFAULT_OUTPUT_EXT = 'html'
 MODE = 0o777 & ~process.umask()
 VERSION = 'Sleet version <%= version %>'
 
 yargs = require('yargs').usage '$0 [options] input.st [input2.st...]'
     .describe 'o', 'The output directory'
-    .describe 'e', 'The file extension of output file'
     .describe 'w', 'Watch file changes'
     .describe 'v', 'Show the version number'
     .describe 'h', 'Show this message'
     .alias 'o', 'output'
-    .alias 'e', 'extension'
     .alias 'w', 'watch'
     .alias 'v', 'version'
     .alias 'h', 'help'
     .boolean 'v'
     .boolean 'h'
     .boolean 'w'
-    .string 'e'
     .string 'o'
 
-exports.run = (compileOptions = {}) ->
+exports.run = ->
     argv = yargs.argv
-    argv.compileOptions = compileOptions
 
     argv.files = argv._.slice()
     return yargs.showHelp() if argv.h
@@ -44,15 +39,28 @@ runIt = exports.runIt = (options = {}) ->
 
     for file in files
         if fs.statSync(file).isDirectory()
-            compileDir file, options
-            watched.dirs[file] = true
+            pkg = findOptionsInPackage(file, false)
+            compileDir file, options, pkg
+            watched.dirs[file] = pkg
         else
-            compileFile file, options
-            watched.files[file] = true
+            pkg = findOptionsInPackage(file, true)
+            compileFile file, options, pkg
+            watched.files[file] = pkg
 
     if options.watch
-        watchDir key, options, watched.dirs for key, value of watched.dirs
-        watchFile key, options, watched.files for key, value of watched.files when not isFileInWatchedDir(key, watched.dirs)
+        watchDir key, options, watched.dirs, value for key, value of watched.dirs
+        watchFile key, options, watched.files, value for key, value of watched.files when not isFileInWatchedDir(key, watched.dirs)
+
+
+findOptionsInPackage = (file, isFile) ->
+    root = if isFile then path.dirname(file) else file
+    root = path.resolve root
+    while path.dirname(root) isnt root
+        pkg = path.join(root, 'package.json')
+        if fs.existsSync(pkg)
+            return require(pkg)?.sleet
+        root = path.dirname(root)
+    null
 
 checkExists = (files) ->
     results = []
@@ -64,14 +72,14 @@ checkExists = (files) ->
     results
 
 
-compileFile = (file, options) ->
-    compileIt file, getOutputFile(file, options), options
+compileFile = (file, options, pkg) ->
+    compileIt file, getOutputFile(file, options), options, pkg
 
-compileDir = (dir, options) ->
+compileDir = (dir, options, pkg) ->
     for file in getDirctoryFiles path.resolve(dir)
-        compileIt file, getOutputFile(file, options, dir), options
+        compileIt file, getOutputFile(file, options, dir), options, pkg
 
-watchDir = (dir, options, watched, root) ->
+watchDir = (dir, options, watched, root, pkg) ->
     console.log "watching directory #{dir}"
     root or= dir
     obj = watched[dir] = files: {}
@@ -87,14 +95,14 @@ watchDir = (dir, options, watched, root) ->
     obj.watcher = fs.watch(dir).on 'change', ->
         for file in getDirctoryFiles dir, true
             o = (obj.files[file] or= compiling: false, last: mtime(file))
-            checkWatchedFile file, o, options, root
+            checkWatchedFile file, o, options, root, pkg
 
 
-watchFile = (file, options, watched) ->
+watchFile = (file, options, watched, pkg) ->
     console.log "watching file #{file}"
     obj = watched[file] = compiling: false, last: mtime(file)
     obj.watcher = fs.watch file
-        .on 'change', -> checkWatchedFile file, obj, options
+        .on 'change', -> checkWatchedFile file, obj, options, pkg
 
 isSleetFile = (file) ->
     path.extname(file) is SLEET_FILE
@@ -115,18 +123,17 @@ dirfiles = (dir, result, notRecursive) ->
         else if isSleetFile(name)
             result.push name
 
-checkWatchedFile = (file, obj, options, dir) ->
+checkWatchedFile = (file, obj, options, dir, pkg) ->
     time = mtime file
     return unless time - obj.last > 0
     return if obj.compiling
     obj.last = time
     obj.compiling = true
-    compileIt file, getOutputFile(file, options, dir), options
+    compileIt file, getOutputFile(file, options, dir), options, pkg
     obj.compiling = false
 
 getOutputFile = (file, options, base) ->
-    ext = options.e or DEFAULT_OUTPUT_EXT
-    name = path.basename(file, path.extname(file)) + '.' + ext
+    name = path.basename(file, path.extname(file))
     dir = path.dirname file
     base or= dir
     if options.o
@@ -141,17 +148,18 @@ getDirctoryFiles = (dir, notRecursive) ->
     dirfiles dir, result, notRecursive
     result
 
-compileIt = (input, out, options) ->
+compileIt = (input, out, options, pkg) ->
     content = fs.readFileSync(input, 'utf8')
-    opt = options.compileOptions or {}
+    opt = pkg or {}
     opt.filename = input
     try
         output = compile content, opt
     catch e
         return console.log e.stack
 
-    o = opt.transform?(output, input, out)
-    o or= output
+    out += '.' + output.extension
+    o = opt.transform?(output.content, input, out)
+    o or= output.content
     fs.writeFileSync out, o, 'utf8'
     console.log "#{new Date().toLocaleTimeString()} - Compiled '#{input}' to '#{out}'"
 

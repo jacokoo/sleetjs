@@ -14,8 +14,8 @@ start
 // declare line start //
 ////////////////////////
 declare_line
-    = '#!' name: identifier
-      ext: (_+ i: identifier {return i;})?
+    = '#!' _* name: identifier
+      ext: (_+ i: identifier ! (_* '=') {return i;})?
       attr:(_+ kv: key_value_pair {return kv})* eol {
         var result = {};
         for (i = 0; i < attr.length; i ++ ) {

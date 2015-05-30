@@ -22,7 +22,7 @@ executeFile = (dir, file) ->
     it "Compile result of [#{file}] should equals to the content of [#{expectedName}]", ->
         compiled = compileIt path.join(dir, file)
         expected = fs.readFileSync(path.join(dir, expectedName), 'utf8').trim() # remove the trailing spaces
-        expect(compiled).to.equal(expected)
+        expect(compiled.content).to.equal(expected)
 
 compileIt = (input) ->
     content = fs.readFileSync(input, 'utf8')

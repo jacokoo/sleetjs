@@ -5,6 +5,12 @@ exports.Context = class Context
     defaultTag: Tag
     defaultPredict: Predict
 
+    constructor: (@options = {}, @indentToken = '  ', @newlineToken = '\n', @defaultLevel = 0, @parent) ->
+        @result = []
+        @tagTypes = {}
+        @predictTypes = {}
+        @blocks = {}
+
     setDefaultTag: (clazz) -> @defaultTag = clazz
 
     setDefaultPredict: (clazz) -> @defaultPredict = clazz
@@ -40,12 +46,6 @@ exports.Context = class Context
         block = @blocks[name]
         throw new Error("Block #{name} is not defined") unless block
         block
-
-    constructor: (@options = {}, @indentToken = '  ', @newlineToken = '\n', @defaultLevel = 0, @parent) ->
-        @result = []
-        @tagTypes = {}
-        @predictTypes = {}
-        @blocks = {}
 
     sub: (level) ->
         sub = new Context(@options, @indentToken, @newlineToken, level or @defaultLevel, @)
