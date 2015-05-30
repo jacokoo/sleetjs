@@ -44,7 +44,6 @@ $ sleet -h
 ```
 Options:
 -o, --output     The output directory
--e, --extension  The file extension of output file
 -w, --watch      Watch file changes
 -v, --version    Show the version number
 -h, --help       Show this message
@@ -58,15 +57,34 @@ directory structure.
 - Compile a directory tree of `.sleet` files in `src` into a parallel tree of
 `.html` files in `dest`
 
-        $ sleet src/ -o dest/
-
-- Compile files into `.tag` files
-
-        $ sleet src/ -o dest/ -e tag
-
+```
+$ sleet src/ -o dest/
+```
 - Watch for changes, and compile file every time it is saved
 
-        $ sleet src/ -o dest/ -w
+```
+$ sleet src/ -o dest/ -w
+```
+
+## First Line Declaration
+
+Sleet use first-line-declaration to determinate which sleet extension is used to compile
+the current file, the extension of output file and the options that the sleet extension uses.
+
+By default, it use sleet as its compiler, and the extension of output file is `html`
+```
+#!sleet html
+```
+
+To config it to use `sleet-handlebars` to compile it with extension and options
+
+```
+#!sleet-handlebars html block=layout,view inline=date,shortDate
+```
+or
+```
+#!Handlebars html block=layout,view inline=date,shortDate
+```
 
 ## Grammar
 Sleet is indent based, it checks indent strictly. You can indent with any number

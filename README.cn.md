@@ -49,7 +49,6 @@ $ sleet -h
 
 Options:
 -o, --output     The output directory
--e, --extension  The file extension of output file
 -w, --watch      Watch file changes
 -v, --version    Show the version number
 -h, --help       Show this message
@@ -62,13 +61,28 @@ Options:
 
         $ sleet src/ -o dest/
 
-- 指定输出文件的扩展名为 `.tag`
-
-        $ sleet src/ -o dest/ -e tag
-
 - 监视 `src` 目录中的文件, 如果有修改的话, 就把修改过的文件编译到 `dest` 目录的对应位置
 
         $ sleet src/ -o dest/ -w
+
+## 首行声明
+
+Sleet 可以用首行声明的方式来确定用哪个Sleet扩展来编译当前文件、输出文件的后缀名以及编译
+时用到的参数
+
+默认情况下，使用sleet来编译，后缀名为`html`
+```
+#!sleet html
+```
+
+如果要配置用`sleet-handlebars`来编译，且指定后缀名与参数，可以按如下配置
+```
+#!sleet-handlebars html block=layout,view inline=date,shortDate
+```
+or
+```
+#!Handlebars html block=layout,view inline=date,shortDate
+```
 
 ## 语法
 Sleet 是严格基于缩进的语言. 缩进相等的相邻标记为兄弟标记，缩进大的的标记是缩进小的标记的子孙标记.
