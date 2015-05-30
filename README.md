@@ -83,7 +83,7 @@ To config it to use `sleet-handlebars` to compile it with extension and options
 ```
 or
 ```
-#!Handlebars html block=layout,view inline=date,shortDate
+#!handlebars html block=layout,view inline=date,shortDate
 ```
 
 ## Grammar

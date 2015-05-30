@@ -81,7 +81,7 @@ Sleet 可以用首行声明的方式来确定用哪个Sleet扩展来编译当前
 ```
 or
 ```
-#!Handlebars html block=layout,view inline=date,shortDate
+#!handlebars html block=layout,view inline=date,shortDate
 ```
 
 ## 语法
