@@ -101,11 +101,12 @@ tag_child
     }
 
 tag_def
-    = tag_indent? name: identifier? clazz: tag_class* id: tag_id? clazz2: tag_class* & {
+    = tag_indent? ns: namespace? name: identifier? clazz: tag_class* id: tag_id? clazz2: tag_class* & {
         return name || clazz.length > 0 || id || clazz2.length > 0
     } attrs: tag_attr_groups? text: tag_text? {
         var tag = {
             name: name,
+            namespace: ns,
             indent: IDT,
             dot: clazz.concat(clazz2),
             hash: id,
@@ -117,6 +118,11 @@ tag_def
             tag.children = [text];
         }
         return tag;
+    }
+
+namespace
+    = name: identifier ':' ! _ {
+        return name;
     }
 
 tag_class
@@ -220,7 +226,7 @@ tali "Tag attribute line indent"
     }
 
 ai "Attribute identifier"
-    = [a-zA-Z$@_] [a-zA-Z0-9$@_.-]* { return text(); }
+    = [a-zA-Z$@_] [a-zA-Z0-9$@_.:-]* { return text(); }
 
 ///////////////////////
 // tag attribute end //

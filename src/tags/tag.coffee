@@ -23,6 +23,9 @@ exports.Tag = class Tag
         attr = item for item in @attributes when item.name.value is name.value and item.name.type is name.type
         if attr then attr.value = attr.value.concat value else @attributes.push name: name, value: value
 
+    getTagName: ->
+        if @options.namespace then @options.namespace + ':' + @name else @name
+
     generate: (context) ->
         @childrenContext = context.sub()
 
@@ -43,7 +46,7 @@ exports.Tag = class Tag
         context.eol().indent(@indent) unless @options.isInlineChild or @options.isInlineSibling
 
     generateTagStart: (context) ->
-        context.push('<').push(@name)
+        context.push('<').push(@getTagName())
 
     generateAttributes: (context) ->
         for item in @attributeGroups
@@ -78,4 +81,4 @@ exports.Tag = class Tag
         @generateTagEnd context
 
     generateTagEnd: (context) ->
-        context.push('</').push(@name).push('>')
+        context.push('</').push(@getTagName()).push('>')
