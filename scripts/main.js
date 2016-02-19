@@ -13,4 +13,11 @@ H.registerHelper('view', function(name, options) {
     return (this.Self instanceof D.View) && this.Self.name === name ? options.fn(this) : '';
 });
 
+D.adapt({
+    getFormData: (el) => {
+        const input = el.querySelector('textarea');
+        return { [input.name]: input.value };
+    }
+});
+
 app.start();

@@ -1,0 +1,12 @@
+#!handlebars
+
+module > .container
+    h3 Try Sleet Online
+    .left(data-region='input')
+    .right(data-region='output')
+
+view('input') > form
+    textarea.input#input(name='input') > echo(code.input)
+
+view('output')
+    #result.output(class='error')&if(code.haveError) > echo(code.output)

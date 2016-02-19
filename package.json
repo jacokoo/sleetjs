@@ -17,8 +17,10 @@
   },
   "homepage": "https://github.com/JacoKoo/sleetjs#readme",
   "dependencies": {
+    "drizzlejs": "^0.4.6",
     "handlebars": "^4.0.5",
-    "drizzlejs": "^0.4.6"
+    "sleet": "0.0.11",
+    "sleet-handlebars": "0.0.11"
   },
   "devDependencies": {
     "babel-preset-es2015": "^6.3.13",
@@ -45,7 +47,17 @@
       ]
     }
   },
-    "browserify": {
-        "transform": ["browserify-handlebars", ["babelify", { "presets": ["es2015"] }]]
-    }
+  "browserify": {
+    "transform": [
+      "browserify-handlebars",
+      [
+        "babelify",
+        {
+          "presets": [
+            "es2015"
+          ]
+        }
+      ]
+    ]
+  }
 }

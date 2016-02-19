@@ -1,0 +1,11 @@
+{{#module}}<div class="container">
+    <h3>Try Sleet Online</h3>
+    <div class="left" data-region="input"></div>
+    <div class="right" data-region="output"></div>
+</div>{{/module}}
+{{#view "input"}}<form>
+    <textarea id="input" class="input" name="input">{{code.input}}</textarea>
+</form>{{/view}}
+{{#view "output"}}
+    <div id="result" class="output {{#if code.haveError}}error{{/if}}">{{code.output}}</div>
+{{/view}}
