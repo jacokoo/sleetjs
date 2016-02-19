@@ -10,5 +10,8 @@ html(lang='en-us')
         link(rel='stylesheet' type='text/css' href='stylesheets/github-light.css' media='screen')
         link(rel='stylesheet' type='text/css' href='stylesheets/style.css' media='screen')
     body
+        script(src='https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.3/ace.js')
+        script(src='https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.3/theme-monokai.js')
+        script(src='https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.3/mode-handlebars.js')
         script(src='dist/common.js')
         script(src='dist/main.js')

@@ -5,8 +5,8 @@ module > .container
     .left(data-region='input')
     .right(data-region='output')
 
-view('input') > form
-    textarea.input#input(name='input') > echo(code.input)
+view('input')
+    .input#input > echo(code.input)
 
 view('output')
     #result.output(class='error')&if(code.haveError) > echo(code.output)

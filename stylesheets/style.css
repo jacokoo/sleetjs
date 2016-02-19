@@ -1,5 +1,5 @@
 .main-content {
-    max-width: 72rem;
+    max-width: 100%;
     width: 100%;
     margin: 0 auto;
     padding: 2rem;
@@ -21,13 +21,7 @@
     padding: 0 0 0 1rem;
 }
 
-.input {
-    width: 100%;
-    min-height: 40rem;
-    font-size: 1rem;
-}
-
-.output {
+.input, .output {
     width: 100%;
     min-height: 40rem;
     border: 1px solid #aaa;

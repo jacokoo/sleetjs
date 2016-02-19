@@ -13,7 +13,7 @@ var fs = require('fs'),
     eslint = require('gulp-eslint'),
 
     libs = [
-        'handlebars/runtime', 'drizzlejs', 'sleet'
+        'handlebars/runtime', 'drizzlejs', 'sleet', 'sleet-handlebars'
     ],
     options = {
         entries: ['./main.js'],

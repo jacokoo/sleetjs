@@ -10,27 +10,32 @@ exports.items = {
 
 exports.store = {
     models: {
-        code: { data: { input: 'a\n    p hello' } }
+        code: { data: { input: '#!handlebars block=helper\n\ndoctype html\nhtml\n    head\n        meta(charset=\'utf-8\')\n        title Welcom to Sleetjs\n        link(rel=\'stylesheet\' href=\'index.css\')\n\n        # script\n        script(type=\'text/javascript\') > uglify(mingle=true) > coffee.\n            number = 2\n            square = (x) -> x * x\n            console.log square number\n\n        # ie conditional comment\n        ieif(\'lt IE 8\') > script(src=\'hello.js\')\n        @ieif(\'gte IE 8\')\n            script(src=\'script.js\')\n    body\n        .container > p.\n            This\n            is\n            a text block\n        #footer\n            p The end\n\n        # handlebars\n        ul.list-group > each(items)\n            li.list-group-item > a(id=\'item-\' + id) > echo(name)\n\n        helper(arg 1 \'a\')\n            p inside the helper\n        else\n            p the reverse part' } }
     },
 
     callbacks: {
         compile: function compile(payload) {
+            var input = payload && payload.input || this.models.code.data.input;
             var output = undefined,
                 haveError = false;
             try {
-                output = sleet.compile(payload.input).content;
+                output = sleet.compile(input).content;
             } catch (e) {
                 output = e.message;
                 haveError = true;
             }
 
             this.models.code.set({
-                input: payload.input,
+                input: input,
                 output: output,
                 haveError: haveError
             }, true);
         }
     }
+};
+
+exports.afterRender = function () {
+    this.dispatch('compile');
 };
 
 },{"sleet":"sleet"}],"./app/compile-to-html/templates":[function(require,module,exports){
@@ -39,9 +44,9 @@ var templater = require("handlebars/runtime")["default"].template;module.exports
 },"3":function(container,depth0,helpers,partials,data) {
     var stack1;
 
-  return "<form>\n    <textarea id=\"input\" class=\"input\" name=\"input\">"
+  return "    <div id=\"input\" class=\"input\">"
     + container.escapeExpression(container.lambda(((stack1 = (depth0 != null ? depth0.code : depth0)) != null ? stack1.input : stack1), depth0))
-    + "</textarea>\n</form>";
+    + "</div>\n";
 },"5":function(container,depth0,helpers,partials,data) {
     var stack1;
 
@@ -60,7 +65,6 @@ var templater = require("handlebars/runtime")["default"].template;module.exports
   if (stack1 != null) { buffer += stack1; }
   return buffer + "\n"
     + ((stack1 = (helpers.view || (depth0 && depth0.view) || alias2).call(alias1,"input",{"name":"view","hash":{},"fn":container.program(3, data, 0),"inverse":container.noop,"data":data})) != null ? stack1 : "")
-    + "\n"
     + ((stack1 = (helpers.view || (depth0 && depth0.view) || alias2).call(alias1,"output",{"name":"view","hash":{},"fn":container.program(5, data, 0),"inverse":container.noop,"data":data})) != null ? stack1 : "");
 },"useData":true});
 },{"handlebars/runtime":"handlebars/runtime"}],"./app/compile-to-html/view-input":[function(require,module,exports){
@@ -70,18 +74,57 @@ exports.bindings = {
     code: false
 };
 
-exports.actions = {
-    'keyup input': 'compile'
+exports.components = [{
+    id: 'input', name: 'ace'
+}];
+
+exports.mixin = {
+    changed: function changed(code) {
+        this.module.dispatch('compile', { input: code });
+    }
 };
 
 },{}],"./app/compile-to-html/view-output":[function(require,module,exports){
-"use strict";
+'use strict';
 
 exports.bindings = {
-    code: true
+    code: 'reset'
 };
 
-},{}],"./app/viewport/index":[function(require,module,exports){
+exports.reset = function () {
+    this.components.result.setValue(this.bindings.code.data.output, -1);
+};
+
+exports.components = [{
+    id: 'result', name: 'ace', options: { mode: 'handlebars', readonly: true }
+}];
+
+},{}],"./app/ext/ace":[function(require,module,exports){
+'use strict';
+
+var D = require('drizzlejs');
+
+D.ComponentManager.register('ace', function (view, el) {
+    var options = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
+    var editor = ace.edit(el);var mode = options.mode;
+    var readonly = options.readonly;
+
+
+    editor.setTheme('ace/theme/monokai');
+    mode && editor.getSession().setMode('ace/mode/' + mode);
+    readonly && editor.setReadOnly(true);
+
+    editor.$blockScrolling = Infinity;
+
+    editor.on('change', function () {
+        view.changed && view.changed(editor.getValue());
+    });
+    return editor;
+}, function (view, comp) {
+    comp.destroy();
+});
+
+},{"drizzlejs":"drizzlejs"}],"./app/viewport/index":[function(require,module,exports){
 'use strict';
 
 exports.items = {
@@ -115,7 +158,7 @@ var templater = require("handlebars/runtime")["default"].template;module.exports
 },{}],1:[function(require,module,exports){
 'use strict';
 
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+require('./app/ext/ace');
 
 var D = require('drizzlejs');
 var H = require('handlebars/runtime');
@@ -134,15 +177,8 @@ H.registerHelper('view', function (name, options) {
     return this.Self instanceof D.View && this.Self.name === name ? options.fn(this) : '';
 });
 
-D.adapt({
-    getFormData: function getFormData(el) {
-        var input = el.querySelector('textarea');
-        return _defineProperty({}, input.name, input.value);
-    }
-});
-
 app.start();
 
-},{"drizzlejs":"drizzlejs","handlebars/runtime":"handlebars/runtime"}]},{},[1]);
+},{"./app/ext/ace":"./app/ext/ace","drizzlejs":"drizzlejs","handlebars/runtime":"handlebars/runtime"}]},{},[1]);
 
 //# sourceMappingURL=main.js.map
