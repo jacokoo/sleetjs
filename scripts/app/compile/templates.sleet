@@ -1,0 +1,17 @@
+#!handlebars
+
+module > .container
+    h3 Try Sleet Online
+    .left(data-region='input')
+    .right(data-region='output')
+
+view('input')
+    p
+        echo('Type ')
+        span#from > echo(state.from ' ')
+        a#reverse(href='javascript:;') [Reverse]
+    .input#input > echo(input)
+
+view('output')
+    p > echo('Compiles to ') + span#to > echo(state.to)
+    #result.output(class='error')&if(code.haveError) > echo(output)

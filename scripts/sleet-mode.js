@@ -48,6 +48,13 @@ define('ace/mode/sleet-highlight-rules', function(require, exports, module) {
             }],
 
             tag: [{
+                regex: '([.#])?([\\w$@_-]+)$',
+                token: function(t, tag) {
+                    tagName = t ? 'div' : tag;
+                    return t ? 'entity.other.attribute-name.sleet' : 'entity.name.tag.sleet';
+                },
+                next: 'start'
+            }, {
                 regex: '([.#])?([\\w$@_-]+)',
                 token: function(t, tag) {
                     tagName = t ? 'div' : tag;

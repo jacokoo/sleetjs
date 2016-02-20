@@ -19,6 +19,7 @@
   "dependencies": {
     "drizzlejs": "^0.4.6",
     "handlebars": "^4.0.5",
+    "handlebars-sleet": "0.0.2",
     "sleet": "0.0.11",
     "sleet-handlebars": "0.0.11"
   },
