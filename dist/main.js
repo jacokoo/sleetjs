@@ -75,7 +75,7 @@ exports.bindings = {
 };
 
 exports.components = [{
-    id: 'input', name: 'ace'
+    id: 'input', name: 'ace', options: { mode: 'sleet' }
 }];
 
 exports.mixin = {
