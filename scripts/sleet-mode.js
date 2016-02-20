@@ -1,35 +1,123 @@
 define('ace/mode/sleet-highlight-rules', function(require, exports, module) {
     var oop = require('../lib/oop'),
         TextHighlightRules = require("./text_highlight_rules").TextHighlightRules,
-        SleetHighlightRules, indentToken, getIndent, indent = 0;
-
-    getIndent = function(value) {
-        return value.match(/^(\s*)/)[1].length;
-    };
+        SleetHighlightRules, indent = 0, tagName;
 
     SleetHighlightRules = function() {
         this.$rules = {
             start: [{
                 token: 'comment',
-                regex: /^#!\s*(.*)$|^\s*# (.*)$/,
+                regex: '^#!\\s*(.*)$',
                 next: 'start'
             }, {
-                onMatch: function(value, current, stack) {
-                    indent = getIndent(value);
+                regex: '\\s*#\\s+(.*)$',
+                token: 'comment',
+                next: 'start'
+            }, {
+                token: function(i) {
+                    indent = i.length;
                     return 'comment';
                 },
-                regex: /^(\s*)(?:#\.\s*)$/,
+                regex: '^(\\s*)#\\.\\s*$',
                 next: 'comment-block'
+            }, {
+                regex: '(\\s*)([.#])?(?:[\\w$@_-]+)$',
+                token: function(i, t) {
+                    return t ? 'entity.other.attribute-name.sleet' : 'entity.name.tag.sleet';
+                },
+                next: 'start'
+            }, {
+                regex: '(\\s*)([.#])?([\\w$@_-]+)',
+                token: function(i, t, tag) {
+                    tagName = t ? 'div' : tag;
+                    indent = i.length
+                    return t ? 'entity.other.attribute-name.sleet' : 'entity.name.tag.sleet';
+                },
+                next: 'tag'
+            }, {
+                regex: '\\|(.*)$',
+                token: 'text',
+                next: 'start'
+            }, {
+                regex: '(\\s*)\\|.\\s*$',
+                token: function(i) {
+                    indent = i.length;
+                    return 'text';
+                },
+                next: 'text-block'
+            }],
+
+            tag: [{
+                regex: '([.#])?([\\w$@_-]+)',
+                token: function(t, tag) {
+                    tagName = t ? 'div' : tag;
+                    return t ? 'entity.other.attribute-name.sleet' : 'entity.name.tag.sleet';
+                },
+                next: 'tag'
+            }, {
+                regex: '\\(',
+                token: 'punctuation.definition.attribute.start.sleet',
+                next: 'attribute'
+            }, {
+                regex: '\\s*[:>+]\\s*',
+                token: 'punctuation.definition.tag.inline.sleet',
+                next: 'tag'
+            }, {
+                regex: '\\s*\\.\\s*$',
+                token: function() {
+                    return 'text';
+                },
+                next: 'text-block'
+            }, {
+                regex: ' .*$',
+                token: 'text',
+                next: 'start'
+            }],
+
+            attribute: [{
+                regex: '(\'[^\']+\'|\"[^\"]+\"|[\\w$@_.-]+),?\\s*',
+                token: 'entity.other.attribute-name.sleet',
+                next: 'attribute'
+            }, {
+                regex: '(\\s*[=+]\\s*)(\'[^\']*\'|\"[^\"]*\"|[\\w$@_.-]*)(,?\\s*)',
+                token: ['punctuation.definition.attribute.equals.sleet', 'string.quoted.sleet', 'punctuation.definition.attribute.equals.sleet'],
+                next: 'attribute'
+            }, {
+                regex: '\\)$',
+                token: 'punctuation.definition.attribute.end.sleet',
+                next: 'start'
+            }, {
+                regex: '\\)',
+                token: 'punctuation.definition.attribute.end.sleet',
+                next: 'tag'
+            }],
+
+            'text-block': [{
+                regex: '^\\s*$',
+                token: 'text',
+                next: 'text-block'
+            }, {
+                regex: '^(\\s*)',
+                token: function(i) {
+                    if (i.length > indent) {
+                        this.next = 'text-block';
+                        return 'text';
+                    }
+                    this.next = 'start';
+                    return 'text';
+                }
             }],
 
             'comment-block': [{
-                onMatch: function(value, current, stack) {
-                    var i = getIndent(value);
-                    console.log(value, i, indent, stack);
-                    this.next = i > indent ? '' : 'start';
-                    return 'comment';
+                token: function(i, value) {
+                    if (i.length > indent || value.trim().length === 0) {
+                        this.next = '';
+                        return 'comment';
+                    }
+                    this.next = 'start';
+                    return 'text';
                 },
-                regex: /^(\s*)(?:.*)$/
+                regex: '^(\\s*)(.*)$'
             }]
         };
     };
@@ -48,8 +136,5 @@ define('ace/mode/sleet', function(require, exports) {
     };
 
     oop.inherits(Mode, TextMode);
-
-    console.log('mode');
-
     exports.Mode = Mode;
 });
