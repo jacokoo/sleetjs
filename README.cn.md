@@ -14,6 +14,8 @@ Sleetjs 是一种把代码编译成 HTML/XML 的语言
 但是你可以扩展一些标记(Tag), 使的编译出来的HTML中包含一些模板引擎需要的标记(如: {{#if}} <% if %>等),
 使的它可以用模板引擎来渲染数据.
 
+[在线试玩](http://jacokoo.github.io/sleetjs)
+
 ## 相关资源
 * [Sleet-Handlebars](https://github.com/JacoKoo/sleet-handlebars) Sleet 的一个扩展，
   用于把 Sleet 代码编译成 Handlebars 模板
