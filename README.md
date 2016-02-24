@@ -14,7 +14,7 @@ It is not a template engine , so it can't render data.
 However, you can override tags to generate a output file that can be used to
 render data with a template engine.
 
-
+[Try it online](http://jacokoo.github.io/sleetjs)
 [中文文档](https://github.com/JacoKoo/sleetjs/blob/master/README.cn.md)
 
 ## Resources
