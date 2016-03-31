@@ -14,7 +14,7 @@ gulp.task('clean', function(cb) {
 });
 
 gulp.task('parser', ['clean'], function() {
-    return gulp.src('src/parser/*.pegjs')
+    return gulp.src('es6/parser/*.pegjs')
         .pipe(peg())
         .pipe(gulp.dest('lib/parser'));
 });

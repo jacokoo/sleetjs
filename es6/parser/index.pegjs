@@ -1,25 +1,24 @@
 {
     var IDT = 0, i = 0, item,
         IDT_TOK = null,
+        Tag = options.Tag,
+        Declaration = options.Declaration,
+        Attribute = options.Attribute,
         parents = [],
         parent = function() {return parents[parents.length - 1];};
 }
 
 start
-    = declare: declare_line? blank_line* tags: nodes? blank_line* _* {
-        return {tags: tags || [], indent: IDT_TOK, declaration: declare};
+    = declare: declare_line? blank_line* nodes: nodes? blank_line* _* {
+        return {nodes: nodes || [], indent: IDT_TOK, declaration: declare};
     }
 
 // declare line start //
 declare_line
     = '#!' _* name: identifier
       ext: (_+ i: identifier ! (_* '=') {return i;})?
-      attr:(_+ kv: key_value_pair {return kv})* eol {
-        var result = {};
-        for (i = 0; i < attr.length; i ++ ) {
-            result[attr[i].key] = attr[i].value;
-        }
-        return {name: name, ext: ext, options: result}
+      attr: (_+ kv: key_value_pair {return kv})* eol {
+        return new Declaration(name, ext, attr);
     }
 
 key_value_pair
@@ -35,12 +34,7 @@ nodes
 
 node
     = p: node_parent c: node_child* {
-        if (c.length === 1 && c[0].inline) {
-            p.inlines = c[0].inlines ? c.concat(c[0].inlines) : c;
-            delete c[0].inlines;
-        } else {
-            p.children = c;
-        }
+        p.children = c;
         return p;
     }
 
@@ -52,12 +46,12 @@ node_parent
 node_child
     = node_sep indent: node_indent & {
         return indent === parent().indent + 1 ? true : parents.pop() && false;
-    } tag: node {
-        return tag;
+    } node: node {
+        return node;
     }
-    / _? c: [:>+] _* tag: node {
-        tag.inline = c;
-        return tag;
+    / _? c: [:><+] _* node: node {
+        node.inlineChar = c;
+        return node;
     }
 
 node_sep
@@ -71,32 +65,22 @@ node_indent
     }
 
 tag
-    = head: tag_head tail: tag_tail? {
-        if (!tail) return head;
-        if (tail.text) head.text = tail.text;
-        if (tail.inlines) head.inlines = tail.inlines;
-        return head;
+    = body: tag_body text: tag_text? {
+        console.log(text, 't');
+        body.text = text || [];
+        return body;
     }
 
-tag_head
+tag_body
     = node_indent? ns: namespace? name: identifier? clazz: tag_class* id: tag_id? clazz2: tag_class* & {
         return name || clazz.length > 0 || id || clazz2.length > 0
     } attrs: attr_groups? {
-        var tag = {
-            name: name,
-            namespace: ns,
-            indent: IDT,
-            dot: clazz.concat(clazz2),
-            hash: id,
-            attributeGroups: attrs || []
-        };
-        return tag;
+        return new Tag(IDT, name, ns, clazz.concat(clazz2), id, attrs);
     }
-    / '|' attrs: attr_groups? { return {name: '|', attributeGroups: attrs || []}; }
-    / '#' { return {name: '#'}; }
-
-tag_tail
-    = text: tag_text { return {text: text}; }
+    / '|' attrs: attr_groups? {
+        return new Tag(IDT, '|', null, null, null, attrs);
+    }
+    / '#' { return new Tag(IDT, '#') }
 
 namespace
     = name: identifier ':' ! _ {
@@ -113,6 +97,30 @@ tag_id
         return name;
     }
 
+// tag text start //
+tag_text
+    = _* '.' _* eol text: tag_text_lines { return text; }
+    / _ ! ([:><+]) text: text_to_end { return [text]; }
+
+tag_text_lines
+    = first: ttl rest: (eol l: ttl { return l; })* {
+        return rest.unshift(first) && rest;
+    }
+
+ttl "Tag text line"
+    = indent: $_+ & {
+        if (IDT_TOK === null) {
+            IDT_TOK = indent.indexOf('\t') < 0 ? indent : '\t';
+        }
+        return indent.length >= (IDT + 1) * IDT_TOK.length;
+    } text: text_to_end {
+        return indent.slice((IDT + 1) * IDT_TOK.length) + text;
+    }
+    / ws: $(w: _* & eol {return w;} ) {
+        return ws.slice((IDT + 1) * IDT_TOK.length);
+    }
+
+
 // tag attribute start //
 attr_groups
     = start: attr_group rest: (_* group: attr_group { return group; })* {
@@ -121,12 +129,12 @@ attr_groups
 
 attr_group
     = _* '(' _* attrs: attr_pairs _* ')' settings: attr_settings? {
-        return {attributes: attrs, settings: settings};
+        return new Attribute.Group(attrs, settings);
     }
     / _* '(' eol attrs: attr_lines _* eol indent: $_* & {
         return (indent || '').length === IDT * IDT_TOK.length;
     } ')'  settings: attr_settings? {
-        return {attributes: attrs, settings: settings};
+        return new Attribute.Group(attrs, settings);
     }
 
 attr_lines
@@ -154,12 +162,12 @@ attr_pairs
 
 attr_pair
     = ns: namespace? key: attr_key value: (_* '=' _* v: attr_values {return v;})? {
-        return {key: key, value: value, namespace: ns};
+        return new Attribute(key, value, ns);
     }
 
 attr_settings
     = _* '&' ! ([#a-zA-Z0-9]* ';') _* name: identifier attrs:('(' c: attr_pairs ')' { return c; })? {
-        return {name: name, attributes: attrs};
+        return new Attribute.Settings(name, attrs);
     }
 
 attr_key = $(! (eol / '=' / ')' / _) .)+
@@ -174,32 +182,9 @@ attr_value
     / n: number { return {value: n, type: 'number'}; }
     / b: boolean { return {value: b, type: 'boolean'}; }
     / name: $(identifier) '(' attrs: attr_pairs ')' {
-        return { type: 'helper', value: {name: name, attributes: attrs} };
+        return new Attribute.Helper(name, attrs);
     }
     / i: $(!(eol / _ / ')' / '+') .)+ { return { value: i, type: 'identifier'}; }
-
-// tag text start //
-tag_text
-    = _* '.' _* eol text: tag_text_lines { return text; }
-    / _ ! ([:><+]) text: text_to_end { return [text]; }
-
-tag_text_lines
-    = first: ttl rest: (eol l: ttl { return l; })* {
-        return rest.unshift(first) && rest;
-    }
-
-ttl "Tag text line"
-    = indent: $_+ & {
-        if (IDT_TOK === null) {
-            IDT_TOK = indent.indexOf('\t') < 0 ? indent : '\t';
-        }
-        return indent.length >= (IDT + 1) * IDT_TOK.length;
-    } text: text_to_end {
-        return indent.slice((IDT + 1) * IDT_TOK.length) + text;
-    }
-    / ws: $(w: _* & eol {return w;} ) {
-        return ws.slice((IDT + 1) * IDT_TOK.length);
-    }
 
 // basic rules start //
 blank_line "Blank line"

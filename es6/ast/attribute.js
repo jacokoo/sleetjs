@@ -27,7 +27,14 @@ Attribute.Settings = class Settings extends AttributeContainer {
     get name () { return this._name; }
 };
 
-Attribute.Helper = class Helper extends Attribute.Settings {};
+Attribute.Helper = class Helper extends Attribute.Settings {
+    constructor (name, attributes) {
+        super(name, attributes);
+        this._type = 'helper';
+    }
+
+    get type () { return this._type; }
+};
 
 Attribute.Group = class Group extends AttributeContainer {
     constructor (attributes, settings) {

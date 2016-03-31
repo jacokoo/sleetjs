@@ -19,12 +19,15 @@ export class Tag {
     get dots () { return this._dots; }
     get attributeGroups () { return this._attributeGroups; }
 
+    get text() { return this._text || []; }
+    set text (t) { this._text = t || []; }
+
     get inlineChar () { return this._inlineChar; }
     set inlineChar (inlineChar) { this._inlineChar = inlineChar; }
 
     get children () { return this._children; }
     set children (children) {
-        if (children.length === 0 && children[0].inlineChar) {
+        if (children.length === 1 && children[0].inlineChar) {
             const child = children[0];
             this._inlines = child._inlines ? children.concat(child._inlines) : children;
             child._inlines = null;
