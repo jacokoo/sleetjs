@@ -49,7 +49,7 @@ node_child
     } node: node {
         return node;
     }
-    / _? c: [:><+] _* node: node {
+    / _? c: [:><+] _+ node: node {
         node.inlineChar = c;
         return node;
     }
@@ -66,7 +66,6 @@ node_indent
 
 tag
     = body: tag_body text: tag_text? {
-        console.log(text, 't');
         body.text = text || [];
         return body;
     }
@@ -100,7 +99,7 @@ tag_id
 // tag text start //
 tag_text
     = _* '.' _* eol text: tag_text_lines { return text; }
-    / _ ! ([:><+]) text: text_to_end { return [text]; }
+    / _ ! ([:><+] _) text: text_to_end { return [text]; }
 
 tag_text_lines
     = first: ttl rest: (eol l: ttl { return l; })* {
@@ -161,13 +160,16 @@ attr_pairs
     }
 
 attr_pair
-    = ns: namespace? key: attr_key value: (_* '=' _* v: attr_values {return v;})? {
+    = ns: namespace? key: attr_key value: (_* '=' _* v: attr_values {return v;}) {
         return new Attribute(key, value, ns);
+    }
+    / value: (_* v: attr_values {return v;}) {
+        return new Attribute(null, value);
     }
 
 attr_settings
     = _* '&' ! ([#a-zA-Z0-9]* ';') _* name: identifier attrs:('(' c: attr_pairs ')' { return c; })? {
-        return new Attribute.Settings(name, attrs);
+        return new Attribute.Setting(name, attrs);
     }
 
 attr_key = $(! (eol / '=' / ')' / _) .)+
@@ -178,13 +180,11 @@ attr_values
     }
 
 attr_value
-    = str: quoted_string { return {value: str, type: 'quoted'}; }
-    / n: number { return {value: n, type: 'number'}; }
-    / b: boolean { return {value: b, type: 'boolean'}; }
-    / name: $(identifier) '(' attrs: attr_pairs ')' {
-        return new Attribute.Helper(name, attrs);
-    }
-    / i: $(!(eol / _ / ')' / '+') .)+ { return { value: i, type: 'identifier'}; }
+    = str: quoted_string { return new Attribute.Quoted(str); }
+    / n: number { return new Attribute.Number(n); }
+    / b: boolean { return new Attribute.Boolean(b); }
+    / name: $(identifier) '(' attrs: attr_pairs ')' { return new Attribute.Helper(name, attrs); }
+    / i: $(!(eol / _ / ')' / '+') .)+ { return new Attribute.Identifier(i); }
 
 // basic rules start //
 blank_line "Blank line"
