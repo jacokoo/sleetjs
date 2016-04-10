@@ -10,11 +10,22 @@ export class Attribute {
     get name () { return this._name; }
     get value () { return this._value; }
     get namespace () { return this._namespace; }
+
+    get minor () {
+        if (!this._name && this._value.length === 1 && this._value[0].minor === 'identifier') {
+            return this._value[0].value;
+        }
+        return null;
+    }
+
+    set major (m) { this._major = m; }
+    get major () { return this._major; }
 }
 
 class AttributeContainer {
-    constructor (attributes) {
+    constructor (attributes, major) {
         this._attributes = attributes;
+        attributes.forEach(attr => attr.major = major); // eslint-disable-line no-param-reassign
     }
 
     get attributes () { return this._attributes; }
@@ -22,12 +33,11 @@ class AttributeContainer {
 
 Attribute.Setting = class Settings extends AttributeContainer {
     constructor (name, attributes) {
-        super(attributes);
+        super(attributes, 'setting');
         this._name = name;
     }
 
     get type () { return 'setting'; }
-
     get name () { return this._name; }
 };
 
@@ -38,7 +48,6 @@ Attribute.Group = class Group extends AttributeContainer {
     }
 
     get type () { return 'group'; }
-
     get setting () { return this._setting; }
 };
 
@@ -87,6 +96,8 @@ Attribute.Helper = class Helper extends Value {
         this._attributes = attributes;
         this._minor = 'helper';
         this._name = name;
+
+        attributes.forEach(attr => attr.major = 'helper'); // eslint-disable-line no-param-reassign
     }
 
     get name () { return this._name; }

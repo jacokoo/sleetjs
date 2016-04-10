@@ -13,6 +13,7 @@ import { DoctypeCompiler } from './compiler/doctype';
 import { EchoCompiler } from './compiler/echo';
 import { MixinDefinitionCompiler } from './compiler/mixin-def';
 import { MixinReferenceCompiler } from './compiler/mixin-ref';
+import { IncludeCompiler } from './compiler/include';
 
 const compilers = {
     tag: new TagCompiler(),
@@ -32,10 +33,25 @@ const compilers = {
     'tag.echo': new EchoCompiler(),
     'tag.@mixin': new MixinDefinitionCompiler(),
     'tag.mixin': new MixinReferenceCompiler(),
+    'tag.@include': new IncludeCompiler()
 };
+
+const emptyTags = [
+    'area', 'base', 'br', 'col', 'command',
+    'embed', 'hr', 'img', 'input', 'keygen',
+    'link', 'meta', 'param', 'source', 'track', 'wbr'
+];
+
+emptyTags.forEach(item => compilers[`tag.${item}`] = new EmptyTagCompiler());
+
 const getCompiler = function(item) {
     let name = item.type;
     let compiler = compilers[`${name}`];
+
+    if (item.major) {
+        name = `${name}.${item.major}`;
+        if (compilers[name]) compiler = compilers[name];
+    }
 
     if (item.minor) {
         name = `${name}.${item.minor}`;
@@ -65,6 +81,7 @@ export class Context {
         this._indent = indent;
         this._children = [];
         this._note = {};
+        this._noteNames = [];
         this._result = [];
 
         if (!parent) {
@@ -100,9 +117,18 @@ export class Context {
     getCompiler (item) { return getCompiler(item); }
 
     getNote (name) { return this._note[name]; }
-    setNote (name, value) { this._note[name] = value; }
-    eachNote (fn) { Object.keys(this._note).forEach(key => fn(key, this._note[key])); }
-    clearNote () { this._note = {}; }
+
+    setNote (name, value) {
+        this._noteNames.push(name);
+        this._note[name] = value;
+    }
+
+    eachNote (fn) { this._noteNames.forEach(key => fn(key, this._note[key])); }
+
+    clearNote () {
+        this._note = {};
+        this._noteNames = [];
+    }
 
     push (text) {
         this._result.push(text);

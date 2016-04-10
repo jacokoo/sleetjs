@@ -2,16 +2,14 @@ import { TagCompiler } from './tag';
 
 export class CommentCompiler extends TagCompiler {
     tagStart (context, tag) {
-        context.push(tag.text.length > 1 ? '<!--' : '// ');
+        context.push('<!--');
+        if (tag.text.length === 1) context.push(' ');
     }
 
     openEnd () {}
 
-    selfClosing (context, tag) {
-        return tag.text.length < 2;
-    }
-
-    closeStart (context) {
+    closeStart (context, tag) {
+        if (tag.text.length === 1) context.push(' ');
         context.push('-->');
     }
 

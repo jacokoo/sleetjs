@@ -21,7 +21,13 @@ export class TextTagCompiler extends TagCompiler {
         escape && (escape = escape.value[0].value === 'escape');
 
         context.eol();
-        tag.text.forEach(item => context.indent().push(escape ? escapeHtml(item) : item).eol());
+        tag.text.forEach(item => {
+            if (!item) {
+                context.eol();
+                return;
+            }
+            context.indent().push(escape ? escapeHtml(item) : item).eol();
+        });
         context.pop();
     }
 }

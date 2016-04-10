@@ -26,6 +26,7 @@ export class MixinReferenceCompiler extends TagCompiler {
         def.result.forEach((item) => {
             if (item.indexOf('$') > -1) {
                 context.push(keys.reduce((acc, k) => acc.replace(new RegExp(`\\$${k}`, 'g'), replacement[k]), item));
+                return;
             }
 
             context.push(item);

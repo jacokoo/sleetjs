@@ -10,5 +10,5 @@ p
 p
     echo(text = abc)
     echo(
-        text = this is a text line
+        text = 'this is a text line'
     )

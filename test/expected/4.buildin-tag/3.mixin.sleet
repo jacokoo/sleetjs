@@ -1,0 +1,17 @@
+@include(../../include/mixin.sleet)
+
+@mixin#demo(name='username' type='text')
+    input(name=$name type=$type)
+
+@mixin#foo(a=a b=b)
+    div(id=$a) in text $b
+
+mixin#include
+mixin#include(id='hello')
+form#form
+    mixin#demo
+    mixin#demo(name='password' type='password')
+    .row
+        mixin#demo
+        mixin#foo
+        mixin#foo(a=id)

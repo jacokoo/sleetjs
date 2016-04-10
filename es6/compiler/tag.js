@@ -60,7 +60,7 @@ export class TagCompiler {
             context.getCompiler(group).compile(context, group, tag);
         });
 
-        context.eachNote((key, value) => context.push(` ${key}="${value}"`));
+        context.eachNote((key, value) => context.push(value === null ? key : ` ${key}="${value}"`));
         context.clearNote();
     }
 
@@ -106,7 +106,13 @@ export class TagCompiler {
 
         const indented = ctx.parent.containsIndent;
         const idt = tag.inlineChar ? 1 : 0;
-        tag.text.forEach(item => ctx.eol().indent(idt + 1).push(item));
+        tag.text.forEach(item => {
+            if (!item) {
+                ctx.eol();
+                return;
+            }
+            ctx.eol().indent(idt + 1).push(item);
+        });
         ctx.eol().indent(idt);
         ctx.parent.containsIndent = indented;
     }

@@ -1,0 +1,2 @@
+@mixin#include(id=id url=url text=foo)
+    a(id=$id href=url) $text

@@ -13,7 +13,7 @@
   },
   "license": "MIT",
   "dependencies": {
-    "yargs": "^2.3.0"
+    "commander": "^2.9.0"
   },
   "devDependencies": {
     "babel-preset-es2015": "^6.6.0",
@@ -24,7 +24,6 @@
     "eslint-plugin-react": "^4.2.0",
     "gulp": "^3.8.11",
     "gulp-babel": "^6.1.2",
-    "gulp-clean": "^0.3.1",
     "gulp-eslint": "^2.0.0",
     "gulp-mocha": "^2.0.0",
     "gulp-peg": "^0.1.2",
@@ -35,7 +34,7 @@
   },
   "scripts": {
     "pretest": "coffee -c test",
-    "test": "mocha --ui bdd test/ test/ast/",
+    "test": "mocha --ui bdd test/",
     "posttest": "find test -name \"*.js\" -delete"
   }
 }
