@@ -6,7 +6,7 @@ export class MixinReferenceCompiler extends TagCompiler {
             throw new Error('Hash property is required for block reference. eg. block#name');
         }
 
-        const def = context.root.getNote(`mixin.${tag.hash}`);
+        const def = context.root.getNote('mixin').get(tag.hash);
         this.startIndent(context, tag);
         const indent = context.last(1);
         const replacement = {};

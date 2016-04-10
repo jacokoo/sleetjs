@@ -19,7 +19,6 @@ const compilers = {
     tag: new TagCompiler(),
     group: new GroupCompiler(),
     attribute: new AttributeCompiler(),
-    'attribute-no-name': new AttributeCompiler(),
     value: new ValueCompiler(),
     setting: new SettingCompiler(),
 
@@ -43,6 +42,12 @@ const emptyTags = [
 ];
 
 emptyTags.forEach(item => compilers[`tag.${item}`] = new EmptyTagCompiler());
+
+const booleanAttribute = [
+    'disabled', 'checked', 'readonly', 'required', 'selected', 'sortable'
+];
+
+booleanAttribute.forEach(item => compilers[`attribute.${item}`] = new AttributeCompiler('', true));
 
 const getCompiler = function(item) {
     let name = item.type;
@@ -71,6 +76,26 @@ const getCompiler = function(item) {
     return compiler;
 };
 
+class Note {
+    constructor (context, name) {
+        this._note = {};
+        this._noteNames = [];
+        this._context = context;
+        this._name = name;
+    }
+
+    get (name) { return this._note[name]; }
+
+    set (name, value) {
+        if (!this._note.hasOwnProperty(name)) this._noteNames.push(name);
+        this._note[name] = value;
+    }
+
+    each (fn) { this._noteNames.forEach(key => fn(key, this._note[key])); }
+
+    clear () { delete this._context._notes[this._name]; }
+}
+
 export class Context {
     constructor (options, tag, indentToken = '    ', indent = -1, parent) {
         this._options = options;
@@ -80,8 +105,7 @@ export class Context {
         this._newlineToken = options.newlineToken || '\n';
         this._indent = indent;
         this._children = [];
-        this._note = {};
-        this._noteNames = [];
+        this._notes = {};
         this._result = [];
 
         if (!parent) {
@@ -116,18 +140,9 @@ export class Context {
     registerCompiler (name, compiler) { compilers[name] = compiler; }
     getCompiler (item) { return getCompiler(item); }
 
-    getNote (name) { return this._note[name]; }
-
-    setNote (name, value) {
-        this._noteNames.push(name);
-        this._note[name] = value;
-    }
-
-    eachNote (fn) { this._noteNames.forEach(key => fn(key, this._note[key])); }
-
-    clearNote () {
-        this._note = {};
-        this._noteNames = [];
+    getNote (name) {
+        if (!this._notes[name]) this._notes[name] = new Note(this, name);
+        return this._notes[name];
     }
 
     push (text) {
@@ -183,7 +198,8 @@ export class Context {
     }
 
     getOutput (noJoin) {
-        if (this._result[0] === '\n') this._result.shift();
+        if (this._result[0] === this._newlineToken) this._result.shift();
+        if (!this._parent && this._result.slice(-1)[0] !== this._newlineToken) this.eol();
         return noJoin ? this._result : this._result.join('');
     }
 

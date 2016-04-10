@@ -21,6 +21,6 @@ export class MixinDefinitionCompiler extends TagCompiler {
             item.name ? replacement[item.name] = value : replacement[value] = null;
         });
 
-        context.root.setNote(`mixin.${tag.hash}`, { result, replacement });
+        context.root.getNote('mixin').set(tag.hash, { result, replacement });
     }
 }

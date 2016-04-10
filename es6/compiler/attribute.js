@@ -1,20 +1,22 @@
 export class AttributeCompiler {
-    constructor (joiner = '') {
+    constructor (joiner = '', booleanAttribute) {
         this._joiner = joiner;
+        this._booleanAttribute = booleanAttribute;
     }
 
-    compile (context, attribute, group, tag) {
+    compile (context, attribute, group, tag, note) {
         let value = this.getValue(context, attribute.value, attribute, group, tag);
-        if (group.setting) {
-            const settingCompiler = context.getCompiler(group.setting);
-            settingCompiler.compile(context, attribute, value, group, tag);
+        let name = attribute.name;
+
+        if (this._booleanAttribute) {
+            name = name || value;
+            note.set(name, null);
             return;
         }
 
-        let name = attribute.name;
         if (!name) name = value;
-        if (context.getNote(name)) value = context.getNote(name) + this.joiner + value;
-        context.setNote(name, value);
+        if (note.get(name)) value = note.get(name) + this.joiner + value;
+        note.set(name, value);
     }
 
     get joiner () { return this._joiner; }

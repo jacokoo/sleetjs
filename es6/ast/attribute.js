@@ -5,7 +5,7 @@ export class Attribute {
         this._namespace = namespace || '';
     }
 
-    get type () { return this._name ? 'attribute' : 'attribute-no-name'; }
+    get type () { return 'attribute'; }
 
     get name () { return this._name; }
     get value () { return this._value; }
@@ -18,7 +18,10 @@ export class Attribute {
         return null;
     }
 
-    set major (m) { this._major = m; }
+    set major (m) {
+        this._major = m;
+        this._value.forEach(v => v.major = m); // eslint-disable-line no-param-reassign
+    }
     get major () { return this._major; }
 }
 
@@ -41,20 +44,37 @@ Attribute.Setting = class Settings extends AttributeContainer {
     get name () { return this._name; }
 };
 
+function merge (target, source) {
+    source.forEach(item => {
+        const attr = target.find(i => i.name && i.name === item.name);
+        attr ? attr._value = attr._value.concat(item._value) : target.push(item);
+    });
+    return target;
+}
+
 Attribute.Group = class Group extends AttributeContainer {
     constructor (attributes, setting) {
-        super(attributes);
+        super(merge([], attributes));
         this._setting = setting;
     }
 
     get type () { return 'group'; }
     get setting () { return this._setting; }
+
+    merge (group) {
+        if (group.setting) return false;
+        merge(this._attributes, group._attributes);
+        return true;
+    }
 };
 
 class Value {
     get type () { return 'value'; }
     get minor () { return this._minor; }
     get value () { return this._value; }
+
+    get major () { return this._major; }
+    set major (m) { this._major = m; }
 }
 
 Attribute.Quoted = class Quoted extends Value {

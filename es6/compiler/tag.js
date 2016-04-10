@@ -54,17 +54,18 @@ export class TagCompiler {
     }
 
     attributes (context, tag) {
-        this.hashDots(context, tag);
+        const note = context.getNote('attribute');
+        this.hashDots(context, tag, note);
 
         tag.attributeGroups && tag.attributeGroups.forEach((group) => {
-            context.getCompiler(group).compile(context, group, tag);
+            context.getCompiler(group).compile(context, group, tag, note);
         });
 
-        context.eachNote((key, value) => context.push(value === null ? key : ` ${key}="${value}"`));
-        context.clearNote();
+        note.each((key, value) => context.push(value === null ? ` ${key}` : ` ${key}="${value}"`));
+        note.clear();
     }
 
-    hashDots (context, tag) {
+    hashDots (context, tag, note) {
         if (!tag.hash && tag.dots.length === 0) return;
 
         const attributes = [];
@@ -79,7 +80,7 @@ export class TagCompiler {
         }
 
         const group = new Attribute.Group(attributes);
-        context.getCompiler(group).compile(context, group, tag);
+        context.getCompiler(group).compile(context, group, tag, note);
     }
 
     openEnd (context, tag) {

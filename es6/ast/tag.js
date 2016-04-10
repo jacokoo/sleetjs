@@ -5,11 +5,20 @@ export class Tag {
         this._namespace = namespace || '';
         this._dots = dots || [];
         this._hash = hash || '';
-        this._attributeGroups = groups;
 
         this._children = [];
         this._inlineChar = '';
         this._inlines = [];
+        this._attributeGroups = null;
+
+        if (groups) {
+            const gs = [];
+            gs.unshift(groups.reduce((acc, item) => {
+                if (!acc.merge(item)) gs.push(item);
+                return acc;
+            }));
+            this._attributeGroups = gs;
+        }
     }
 
     get type () { return 'tag'; }

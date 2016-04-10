@@ -21,7 +21,7 @@ executeFile = (dir, file) ->
     expectedName = "#{name}-expected.html"
     it "Compile result of [#{file}] should equals to the content of [#{expectedName}]", ->
         compiled = compileIt path.join(dir, file)
-        expected = fs.readFileSync(path.join(dir, expectedName), 'utf8').trim() # remove the trailing spaces
+        expected = fs.readFileSync(path.join(dir, expectedName), 'utf8')
         expect(compiled.content).to.equal(expected)
 
 compileIt = (input) ->
