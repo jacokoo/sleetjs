@@ -49,28 +49,32 @@ const booleanAttribute = [
 
 booleanAttribute.forEach(item => compilers[`attribute.${item}`] = new AttributeCompiler('', true));
 
-const getCompiler = function(item) {
+const getCompiler = function(others, item) {
     let name = item.type;
     let compiler = compilers[`${name}`];
 
     if (item.major) {
         name = `${name}.${item.major}`;
-        if (compilers[name]) compiler = compilers[name];
+        if (others[name]) compiler = others[name];
+        else if (compilers[name]) compiler = compilers[name];
     }
 
     if (item.minor) {
         name = `${name}.${item.minor}`;
-        if (compilers[name]) compiler = compilers[name];
+        if (others[name]) compiler = others[name];
+        else if (compilers[name]) compiler = compilers[name];
     }
 
     if (item.name) {
         name = `${name}.${item.name}`;
-        if (compilers[name]) compiler = compilers[name];
+        if (others[name]) compiler = others[name];
+        else if (compilers[name]) compiler = compilers[name];
     }
 
     if (item.namespace) {
         name = `${name}.${item.namespace}`;
-        if (compilers[name]) compiler = compilers[name];
+        if (others[name]) compiler = others[name];
+        else if (compilers[name]) compiler = compilers[name];
     }
 
     return compiler;
@@ -109,7 +113,7 @@ export class Context {
         this._result = [];
 
         if (!parent) {
-            tag.forEach(item => this.sub(item));
+            this._compilers = {};
         }
     }
 
@@ -131,14 +135,14 @@ export class Context {
         const ctx = new Context(this._options, tag, this._indentToken, idt + this._indent + 1, this);
         this._children.push(ctx);
 
-        ctx.compiler = getCompiler(tag);
+        ctx.compiler = this.getCompiler(tag);
         ctx.compiler.walk(ctx, tag);
 
         return ctx;
     }
 
-    registerCompiler (name, compiler) { compilers[name] = compiler; }
-    getCompiler (item) { return getCompiler(item); }
+    registerCompiler (name, compiler) { this.root._compilers[name] = compiler; }
+    getCompiler (item) { return getCompiler(this.root._compilers, item); }
 
     getNote (name) {
         if (!this._notes[name]) this._notes[name] = new Note(this, name);
@@ -184,7 +188,10 @@ export class Context {
         if (this._parent) this._parent._result = this._parent._result.concat(this._result);
     }
 
-    doCompile () {
+    doCompile (tags) {
+        if (!this._parent && tags) {
+            tags.forEach(item => this.sub(item));
+        }
         if (this._compiler) {
             this._compiler.compile(this, this._tag);
             this.mergeUp();

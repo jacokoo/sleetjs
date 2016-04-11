@@ -8,7 +8,7 @@ import { Context } from './context';
 export function compile (input, options = {}) {
     try {
         const result = parser.parse(input, { Tag, Declaration, Attribute });
-        const context = new Context(options, result.nodes, options.indentToken || result.indent);
+        const context = new Context(options, null, options.indentToken || result.indent);
         let extension = null;
 
         if (result.declaration) {
@@ -28,7 +28,7 @@ export function compile (input, options = {}) {
             }
         }
 
-        context.doCompile();
+        context.doCompile(result.nodes);
         return { content: context.getOutput(), extension: extension || options.extension || 'html' };
     } catch (e) {
         if (e instanceof parser.SyntaxError) {
