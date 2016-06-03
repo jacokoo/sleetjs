@@ -33,8 +33,6 @@
     "pegjs": "^0.8.0"
   },
   "scripts": {
-    "pretest": "coffee -c test",
-    "test": "mocha --ui bdd test/",
-    "posttest": "find test -name \"*.js\" -delete"
+    "test": "mocha --ui bdd test/"
   }
 }
