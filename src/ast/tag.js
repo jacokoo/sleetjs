@@ -12,11 +12,10 @@ export class Tag {
         this._attributeGroups = null;
 
         if (groups) {
-            const gs = [];
-            gs.unshift(groups.reduce((acc, item) => {
-                if (!acc.merge(item)) gs.push(item);
-                return acc;
-            }));
+            const gs = groups.filter(g => !!g.setting);
+            if (gs.length < groups.length) {
+                gs.push(groups.filter(g => !g.setting).reduce((acc, item) => acc.merge(item) && acc));
+            }
             this._attributeGroups = gs;
         }
     }
