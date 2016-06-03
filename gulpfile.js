@@ -13,19 +13,19 @@ gulp.task('clean', function(cb) {
 });
 
 gulp.task('parser', ['clean'], function() {
-    return gulp.src('es6/parser/*.pegjs')
+    return gulp.src('src/parser/*.pegjs')
         .pipe(peg())
         .pipe(gulp.dest('lib/parser'));
 });
 
 gulp.task('lint', function() {
-    return gulp.src('es6/**/*.js')
+    return gulp.src('src/**/*.js')
         .pipe(eslint())
         .pipe(eslint.format());
 });
 
 gulp.task('build', ['parser', 'lint'], function() {
-    return gulp.src('es6/**/*.js')
+    return gulp.src('src/**/*.js')
         .pipe(babel({presets: ['es2015']}))
         .pipe(gulp.dest('lib'));
 });
