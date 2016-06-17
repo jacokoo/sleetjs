@@ -13,15 +13,13 @@ export class MixinReferenceCompiler extends TagCompiler {
         const keys = Object.keys(def.replacement);
         keys.forEach(item => replacement[item] = def.replacement[item]);
 
-        if (tag.attributeGroups) {
-            const group = tag.attributeGroups[0];
-            group.attributes.forEach(item => {
-                if (!item.name) return;
-                if (!replacement.hasOwnProperty(item.name)) return;
+        const group = tag.attributeGroups.length && tag.attributeGroups[0];
+        group && group.attributes.forEach(item => {
+            if (!item.name) return;
+            if (!replacement.hasOwnProperty(item.name)) return;
 
-                replacement[item.name] = context.getCompiler(item).getValue(context, item.value, item, group, tag);
-            });
-        }
+            replacement[item.name] = context.getCompiler(item).getValue(context, item.value, item, group, tag);
+        });
 
         def.result.forEach((item) => {
             if (item.indexOf('$') > -1) {

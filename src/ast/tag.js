@@ -9,15 +9,22 @@ export class Tag {
         this._children = [];
         this._inlineChar = '';
         this._inlines = [];
-        this._attributeGroups = null;
+        this._attributeGroups = groups || [];
+        this._doMergeAttributeGroups();
+    }
 
-        if (groups) {
-            const gs = groups.filter(g => !!g.setting);
-            if (gs.length < groups.length) {
-                gs.push(groups.filter(g => !g.setting).reduce((acc, item) => acc.merge(item) && acc));
-            }
-            this._attributeGroups = gs;
+    addAttributeGroup (group) {
+        this._attributeGroups.push(group);
+        this._doMergeAttributeGroups();
+    }
+
+    _doMergeAttributeGroups () {
+        const groups = this._attributeGroups;
+        const gs = groups.filter(g => !!g.setting);
+        if (gs.length < groups.length) {
+            gs.push(groups.filter(g => !g.setting).reduce((acc, item) => acc.merge(item) && acc));
         }
+        this._attributeGroups = gs;
     }
 
     get type () { return 'tag'; }
@@ -51,7 +58,7 @@ export class Tag {
     set parent (parent) { this._parent = parent; }
 
     get firstAttribute () {
-        if (!this._attributeGroups || this._attributeGroups.length < 1) return null;
+        if (!this._attributeGroups.length) return null;
         return this._attributeGroups[0].attributes[0];
     }
 }

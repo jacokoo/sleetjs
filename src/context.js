@@ -51,7 +51,7 @@ booleanAttribute.forEach(item => compilers[`attribute.${item}`] = new AttributeC
 
 const getCompiler = function(others, item) {
     let name = item.type;
-    let compiler = compilers[`${name}`];
+    let compiler = others[`${name}`] || compilers[`${name}`];
 
     if (item.major) {
         name = `${name}.${item.major}`;
@@ -205,8 +205,11 @@ export class Context {
     }
 
     getOutput (noJoin) {
-        if (this._result[0] === this._newlineToken) this._result.shift();
-        if (!this._parent && this._result.slice(-1)[0] !== this._newlineToken) this.eol();
+        if (!this._parent) {
+            if (this._result[0] === this._newlineToken) this._result.shift();
+            if (this._result.slice(-1)[0] !== this._newlineToken) this.eol();
+        }
+
         return noJoin ? this._result : this._result.join('');
     }
 

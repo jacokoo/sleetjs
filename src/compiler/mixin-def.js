@@ -13,10 +13,12 @@ export class MixinDefinitionCompiler extends TagCompiler {
         const ctx = context.sub(tag, -2);
         ctx.compileChildren();
         const result = ctx.getOutput(true);
-        const group = tag.attributeGroups && tag.attributeGroups[0];
+        result.shift(); // remove the leading \n
+
+        const group = tag.attributeGroups.length && tag.attributeGroups[0].attributes;
         const replacement = {};
 
-        group.attributes.forEach(item => {
+        group && group.forEach(item => {
             const value = context.getCompiler(item).getValue(context, item.value, item, group, tag);
             item.name ? replacement[item.name] = value : replacement[value] = null;
         });

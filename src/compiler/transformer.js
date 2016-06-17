@@ -24,7 +24,7 @@ export class TransformerCompiler extends TagCompiler {
 
     getOptions (context, tag) {
         const options = {};
-        if (!tag.attributeGroups) return options;
+        if (!tag.attributeGroups.length) return options;
 
         tag.attributeGroups.forEach(group => group.attributes.forEach(attr => {
             if (!attr.name) return;

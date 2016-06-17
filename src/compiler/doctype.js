@@ -21,7 +21,7 @@ export class DoctypeCompiler extends TagCompiler {
     compile (context, tag) {
         let type = 'html';
         this.startIndent(context, tag);
-        if (tag.attributeGroups && tag.attributeGroups.length > 0) {
+        if (tag.attributeGroups.length) {
             const value = tag.attributeGroups[0].attributes[0].value[0];
             if (value.minor === 'quoted') {
                 context.push(`<!DOCTYPE ${value.value}>`);

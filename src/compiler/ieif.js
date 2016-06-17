@@ -15,7 +15,7 @@ export class IeifCompiler extends TagCompiler {
     }
 
     attributes (context, tag) {
-        if (!tag.attributeGroups || tag.attributeGroups.length < 1) return;
+        if (!tag.attributeGroups.length) return;
 
         const attr = tag.attributeGroups[0].attributes[0];
         context.push(attr && attr.value[0].value);

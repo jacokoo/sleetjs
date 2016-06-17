@@ -4,19 +4,33 @@ export class AttributeCompiler {
         this._booleanAttribute = booleanAttribute;
     }
 
-    compile (context, attribute, group, tag, note) {
-        let value = this.getValue(context, attribute.value, attribute, group, tag);
-        let name = attribute.name;
-
+    compile (context, attribute, group, tag) {
         if (this._booleanAttribute) {
-            name = name || value;
-            note.set(name, null);
+            context.push(` ${attribute.name}`);
             return;
         }
 
-        if (!name) name = value;
-        if (note.get(name)) value = note.get(name) + this.joiner + value;
-        note.set(name, value);
+        context.push(' ');
+        this.generateName(context, attribute, group, tag);
+        context.push('="');
+        this.generateValue(context, attribute, group, tag);
+        context.push('"');
+    }
+
+    generateName (context, attribute, group, tag) {
+        if (attribute.name) {
+            context.push(attribute.name);
+            return;
+        }
+        this.generateValue(context, attribute, group, tag);
+    }
+
+    generateValue (context, attribute, group, tag) {
+        attribute.value.forEach(v => {
+            context.push(context.getCompiler(v).compile(context, v, attribute, group, tag));
+            context.push(this.joiner);
+        });
+        context.pop();
     }
 
     get joiner () { return this._joiner; }

@@ -1,7 +1,7 @@
 export class SettingCompiler {
-    compile (context, group, tag, note) {
+    compile (context, group, tag) {
         group.attributes.forEach((attr) => {
-            context.getCompiler(attr).compile(context, attr, group, tag, note);
+            context.getCompiler(attr).compile(context, attr, group, tag);
         });
     }
 }
