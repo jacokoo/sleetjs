@@ -158,17 +158,6 @@ dynamic_text
         return name
     }
 
-transform
-    = value: normal_value ts: (_* '|' _* c: (transformer / normal_value) { return c })+ {
-    	return {type: 'transform', value, transformers: ts}
-    }
-
-transformer
-    = name: identifier '(' _* first: normal_value rest: (_* v: normal_value {return v})* _* ')' {
-        rest.unshift(first)
-        return {type: 'transformer', name, values: rest}
-    }
-
 // tag attribute start //
 attr_groups
     = start: attr_group rest: (_* group: attr_group { return group; })* {
@@ -251,6 +240,18 @@ helper_attr
     }
     / value: helper_value {
         return {type: 'attribute', value}
+    }
+
+
+transform
+    = value: normal_value ts: (_* '|' _* c: (transformer / normal_value) { return c })+ {
+    	return {type: 'transform', value, transformers: ts}
+    }
+
+transformer
+    = name: identifier '(' _* first: normal_value rest: (_* v: normal_value {return v})* _* ')' {
+        rest.unshift(first)
+        return {type: 'transformer', name, values: rest}
     }
 
 string_value = s: quoted_string { return {type: 'quoted', value: s} }
