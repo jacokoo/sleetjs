@@ -1,15 +1,25 @@
 {
-    var IDT = 0,
-        IDT_TOK = null,
-        textIndent = 0,
-        parents = [],
-        ast = options.ast,
-        parent = function() {return parents[parents.length - 1]}
+    const parents = []
+    const ast = options.ast
+    const parent = () => parents[parents.length - 1]
+    const flatSibling = (nodes) => nodes.reduce((acc, item) => {
+        acc.push(item)
+        while (acc[acc.length - 1].sibling) {
+            const last = acc[acc.length - 1]
+            acc.push(last.sibling)
+            delete last.sibling
+        }
+        return acc
+    }, [])
+
+    let IDT = 0
+    let IDT_TOK = null
+    let textIndent = 0
 }
 
 start
     = declare: declare_line? blank_line* nodes: nodes? blank_line* _* {
-        return {nodes: nodes || [], indent: IDT_TOK || '', declaration: declare}
+        return {nodes: flatSibling(nodes || []), indent: IDT_TOK || '', declaration: declare}
     }
 
 // declare line start //
@@ -34,7 +44,10 @@ nodes
 
 node
     = p: node_parent c: node_child* {
-        p._setChildren(c)
+        let cc = c.filter(it => it !== p.sibling)
+        if (!p.sibling) cc = flatSibling(cc)
+        p._setChildren(cc)
+        parents.pop()
         return p
     }
 
@@ -45,12 +58,15 @@ node_parent
 
 node_child
     = node_sep indent: node_indent & {
-        return indent === parent().indent + 1 ? true : parents.pop() && false
+        return indent === parent().indent + 1 ? true : false
     } node: node {
         return node
     }
-    / _? c: [:><+] _+ node: node {
-        node._setInlineChar(c)
+    / _? [:>] _+ node: node {
+        return node
+    }
+    / _? '+' _+ node: node {
+        parent().sibling = node
         return node
     }
 
@@ -115,11 +131,11 @@ extra_value = normal_value / compare_value
 tag_text
     = _* '..' & { textIndent = 0; return true} _* eol text: tag_text_lines { return text }
     / _* '.' & { textIndent = 1; return true} _* eol text: tag_text_lines { return text }
-    / _ ! ([:><+] _) text: text_to_end { return text }
+    / _ ! ([:>+] _) text: text_to_end { return text }
 
 tag_text_lines
     = first: ttl rest: (e: (eol { return location()}) l: ttl { return [e, l] })* {
-        return rest.reduce(function(acc, item) {
+        return rest.reduce((acc, item) => {
             return acc.concat(new ast.StaticText('\\n', item[0])).concat(item[1])
         }, [first])
     }

@@ -11,7 +11,7 @@ export enum NodeType {
     StaticText, DynamicText
 }
 
-class SleetNode {
+export class SleetNode {
     protected _location: Location
     private _type: NodeType
 
@@ -29,10 +29,10 @@ class SleetNode {
     }
 }
 
-class NamedNode extends SleetNode {
-    private _name: string
+class NamedParentNode<T> extends SleetNode {
+    private _name: T
 
-    constructor (name: string, type: NodeType, location: Location) {
+    constructor (name: T, type: NodeType, location: Location) {
         super(type, location)
         this._name = name
     }
@@ -42,10 +42,10 @@ class NamedNode extends SleetNode {
     }
 }
 
-class NullableNamedNode extends NamedNode {
-    get name (): string | null {
-        return super.name
-    }
+class NamedNode extends NamedParentNode<string> {
+}
+
+class NullableNamedNode extends NamedParentNode<string | undefined> {
 }
 
 class SleetValue<T> extends SleetNode {
@@ -79,7 +79,7 @@ export class NumberValue extends SleetValue<number> {
     }
 }
 
-export class NullValue extends SleetValue<void> {
+export class NullValue extends SleetValue<null> {
     constructor(location: Location) {
         super(null, NodeType.NullValue, location)
     }
@@ -259,9 +259,6 @@ export class Tag extends NullableNamedNode {
     private _indent: number
 
     private _children: Tag[] = []
-    private _inlineChar?: string
-    private _inlines: Tag[] = []
-
     private _attributeGroups: AttributeGroup[]
     private _extra?: TagExtra
 
@@ -279,7 +276,7 @@ export class Tag extends NullableNamedNode {
         this._hash = hash
         this._extra = extra
 
-        this._setGroup(groups)
+        this._setGroup(groups || [])
     }
 
     get indent () { return this._indent }
@@ -287,28 +284,17 @@ export class Tag extends NullableNamedNode {
     get hash () { return this._hash }
     get namespace () { return this._namespace }
     get children () { return this._children }
-    get inlineChar () { return this._inlineChar }
-    get inlines () { return this._inlines }
     get attributeGroups () { return this._attributeGroups }
     get extra () { return this._extra }
     get parent () { return this._parent }
     get text () { return this._text }
 
-    _setInlineChar (char: string) { this._inlineChar = char }
-
     _setChildren (children: Tag[]) {
-        if (children.length === 1 && children[0].inlineChar) {
-            const child = children[0]
-            this._inlines = child.inlines.concat(children)
-            child._inlines = []
-            return
-        }
-
         this._children = children
     }
 
     _setText (text: SleetText[]) {
-        this._text = text.reduce((acc, item) => {
+        this._text = (text || []).reduce((acc, item) => {
             if (!acc.length) return [item]
             if (item.type === NodeType.DynamicText) return acc.concat(item)
             const last = acc[acc.length - 1]
@@ -321,7 +307,7 @@ export class Tag extends NullableNamedNode {
         }, [] as SleetText[])
     }
 
-    private _setGroup (groups: AttributeGroup[] = []) {
+    private _setGroup (groups: AttributeGroup[]) {
         this._attributeGroups = groups.reduce((acc, item) => {
             if (!acc.length) return [item]
             if (acc[acc.length - 1]._merge(item)) return acc

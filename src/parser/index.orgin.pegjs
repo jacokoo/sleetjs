@@ -3,7 +3,16 @@
         IDT_TOK = null,
         textIndent = 0,
         parents = [],
-        parent = function() {return parents[parents.length - 1];};
+        parent = () => parents[parents.length - 1],
+        flatSibling = (nodes) => nodes.reduce((acc, item) => {
+            acc.push(item)
+            while (acc[acc.length - 1].sibling) {
+                const last = acc[acc.length - 1]
+                acc.push(last.sibling)
+                delete last.sibling
+            }
+            return acc
+        }, [])
 }
 
 start
@@ -14,8 +23,9 @@ start
 // declare line start //
 declare_line
     = '#!' _* name: identifier
-      ext: (_+ i: identifier ! (_* '=') {return i;})?
-      attr: (_+ kv: key_value_pair {return kv})* eol {
+        ext: (_+ i: identifier ! (_* '=') {return i;})?
+        attr: (_+ kv: key_value_pair {return kv})* eol {
+
         return {name: name, extension: ext, attributes: attr};
     }
 
@@ -32,7 +42,10 @@ nodes
 
 node
     = p: node_parent c: node_child* {
-        p.children = c;
+        let cc = c.filter(it => it !== p.sibling)
+        if (!p.sibling) cc = flatSibling(cc)
+        p.children = cc
+        parents.pop()
         return p;
     }
 
@@ -43,13 +56,16 @@ node_parent
 
 node_child
     = node_sep indent: node_indent & {
-        return indent === parent().indent + 1 ? true : parents.pop() && false;
+        return indent === parent().indent + 1 ? true : false;
     } node: node {
         return node;
     }
-    / _? c: [:><+] _+ node: node {
-        node.inlineChar = c;
-        return node;
+    / _? [:>] _+ node: node {
+        return node
+    }
+    / _? '+' _+ node: node {
+        parent().sibling = node
+        return node
     }
 
 node_sep
@@ -65,6 +81,7 @@ node_indent
 tag
     = body: tag_body text: tag_text? {
         body.text = text || [];
+        console.log(body.name, text)
         return body;
     }
 
@@ -113,7 +130,7 @@ extra_value = normal_value / compare_value
 tag_text
     = _* '..' & { textIndent = 0; return true} _* eol text: tag_text_lines { return text; }
     / _* '.' & { textIndent = 1; return true} _* eol text: tag_text_lines { return text; }
-    / _ ! ([:><+] _) text: text_to_end { return [text]; }
+    / _ ! ([:>+] _) text: text_to_end { return text; }
 
 tag_text_lines
     = first: ttl rest: (eol l: ttl { return l; })* {
