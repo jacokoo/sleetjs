@@ -1,4 +1,4 @@
-@include(../../include/mixin.sleet)
+@include('../../include/mixin.sleet')
 
 @mixin#demo(name='username' type='text')
     input(name=$name type=$type)

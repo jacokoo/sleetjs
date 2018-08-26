@@ -48,7 +48,7 @@ class NamedNode extends NamedParentNode<string> {
 class NullableNamedNode extends NamedParentNode<string | undefined> {
 }
 
-class SleetValue<T> extends SleetNode {
+export class SleetValue<T> extends SleetNode {
     protected _value: T
 
     constructor(value: T, type: NodeType, location: Location) {
@@ -59,11 +59,19 @@ class SleetValue<T> extends SleetNode {
     get value () {
         return this._value
     }
+
+    toHTMLString () {
+        return this._value + ''
+    }
 }
 
 export class StringValue extends SleetValue<string> {
     constructor(value: string, location: Location) {
         super(value, NodeType.StringValue, location)
+    }
+
+    toHTMLString () {
+        return `"${this._value.replace(/"/g, '\\"')}"`
     }
 }
 
@@ -100,6 +108,7 @@ export class CompareOperatorValue extends SleetValue<CompareOperator> {
     }
 }
 
+// at least one param
 export class Transformer extends NamedNode {
     private _params: NormalValue[]
 
@@ -110,6 +119,10 @@ export class Transformer extends NamedNode {
 
     get params () {
         return this._params
+    }
+
+    toHTMLString () {
+        return `${this.name}(${this._params.map(it => it.toHTMLString()).join(' ')})`
     }
 }
 
@@ -124,6 +137,10 @@ export class TransformValue extends SleetValue<NormalValue> {
     get transformers () {
         return this._transformers
     }
+
+    toHTMLString () {
+        return `${this._value.toHTMLString()}${this._transformers.map(it => ` | ` + it.toHTMLString()).join('')}`
+    }
 }
 
 export type HelperValue = NormalValue | CompareOperatorValue | TransformValue
@@ -131,7 +148,7 @@ export type HelperValue = NormalValue | CompareOperatorValue | TransformValue
 export class HelperAttribute extends NullableNamedNode {
     private _value: HelperValue
 
-    constructor(name: string, value: HelperValue, location: Location) {
+    constructor(name: string | undefined, value: HelperValue, location: Location) {
         super(name, NodeType.HelperAttribute, location)
         this._value = value
     }
@@ -139,18 +156,26 @@ export class HelperAttribute extends NullableNamedNode {
     get value () {
         return this._value
     }
+
+    toHTMLString () {
+        return `${this.name ? this.name + '=' : ''}${this.value.toHTMLString()}`
+    }
 }
 
 export class Helper extends NullableNamedNode {
     private _attributes: HelperAttribute[]
 
-    constructor(name: string, attributes: HelperAttribute[], location: Location) {
+    constructor(name: string | undefined, attributes: HelperAttribute[], location: Location) {
         super(name, NodeType.Helper, location)
         this._attributes = attributes || []
     }
 
     get attributes () {
         return this._attributes
+    }
+
+    toHTMLString () {
+        return `${this.name ? this.name : ''}(${this._attributes.map(it => it.toHTMLString()).join(' ')})`
     }
 }
 
@@ -164,6 +189,10 @@ export class StaticText extends SleetValue<string> {
         this._value += text._value
         this._location = o
     }
+
+    toHTMLString () {
+        return this.value
+    }
 }
 
 export type DynamicTextValue = IdentifierValue | Helper
@@ -172,9 +201,14 @@ export class DynamicText extends SleetValue<DynamicTextValue> {
     constructor(value: DynamicTextValue, location: Location) {
         super(value, NodeType.DynamicText, location)
     }
+
+    toHTMLString () {
+        return '$' + this.value.toHTMLString()
+    }
 }
 
 export type SleetText = StaticText | DynamicText
+export type SleetTextLine = SleetText[]
 
 export type AttributeValue = NormalValue | Helper
 
@@ -182,10 +216,10 @@ export class Attribute extends NullableNamedNode {
     private _values: AttributeValue[]
     private _namespace?: string
 
-    constructor(ns: string, name: string, values: AttributeValue[], location: Location) {
-        super(name, NodeType.Attribute, location)
+    constructor(ns: string | undefined, name: string | undefined, values: AttributeValue[], location: Location) {
+        super(name === null ? undefined : name, NodeType.Attribute, location)
         this._values = values || []
-        this._namespace = ns
+        this._namespace = ns === null ? undefined : ns
     }
 
     get values () {
@@ -194,6 +228,12 @@ export class Attribute extends NullableNamedNode {
 
     get namespace () {
         return this._namespace
+    }
+
+    merge (other: Attribute) {
+        if (!this.name || this.name !== other.name || this.namespace !== other.namespace) return false
+        this._values = this._values.concat(other._values)
+        return true
     }
 }
 
@@ -214,10 +254,10 @@ export class AttributeGroup extends SleetNode {
     private _setting?: Setting
     private _attributes: Attribute[]
 
-    constructor(attributes: Attribute[], setting: Setting, location: Location) {
+    constructor(attributes: Attribute[], setting: Setting | undefined, location: Location) {
         super(NodeType.AttributeGroup, location)
         this._setting = setting
-        this._attributes = attributes || []
+        this._setAttributes(attributes || [])
     }
 
     get attributes () {
@@ -228,10 +268,26 @@ export class AttributeGroup extends SleetNode {
         return this._setting
     }
 
-    _merge (other: AttributeGroup) {
-        if (other._setting || this._setting) return false
+    _setAttributes (source: Attribute[]) {
+        let target = source
+        let idx = 0
+
+        while (idx < target.length) {
+            let current = target
+            target = []
+            current.forEach((it, i) => {
+                if (idx >= i) target.push(it)
+                else if (!current[idx].merge(it)) target.push(it)
+            })
+            idx ++
+        }
+        this._attributes = target
+    }
+
+    merge (other: AttributeGroup, ignoreSetting = false) {
+        if (!ignoreSetting && (other._setting || this._setting)) return false
         const o = {start: this._location.start, end: other._location.end}
-        this._attributes = this._attributes.concat(other._attributes)
+        this._setAttributes(this._attributes.concat(other._attributes))
         this._location = o
         return true
     }
@@ -263,10 +319,10 @@ export class Tag extends NullableNamedNode {
     private _extra?: TagExtra
 
     private _parent?: Tag
-    private _text: SleetText[] = []
+    private _text: SleetTextLine[] = []
 
     constructor (
-        indent: number, name: string, ns: string, dots: string[], hash: string,
+        indent: number, name: string | undefined, ns: string, dots: string[], hash: string | undefined,
         groups: AttributeGroup[], extra: TagExtra, location: Location
     ) {
         super(name, NodeType.Tag, location)
@@ -293,8 +349,8 @@ export class Tag extends NullableNamedNode {
         this._children = children
     }
 
-    _setText (text: SleetText[]) {
-        this._text = (text || []).reduce((acc, item) => {
+    _setText (text: SleetTextLine[]) {
+        this._text = (text || []).map(it => it.reduce((acc, item) => {
             if (!acc.length) return [item]
             if (item.type === NodeType.DynamicText) return acc.concat(item)
             const last = acc[acc.length - 1]
@@ -304,13 +360,13 @@ export class Tag extends NullableNamedNode {
             }
 
             return acc.concat(item)
-        }, [] as SleetText[])
+        }, [] as SleetText[]))
     }
 
     private _setGroup (groups: AttributeGroup[]) {
         this._attributeGroups = groups.reduce((acc, item) => {
             if (!acc.length) return [item]
-            if (acc[acc.length - 1]._merge(item)) return acc
+            if (acc[acc.length - 1].merge(item)) return acc
             return acc.concat(item)
         }, [] as AttributeGroup[])
     }
@@ -330,7 +386,7 @@ export class Declaration extends NamedNode {
         return this._extension;
     }
 
-    option (key) {
+    option (key: string) {
         return this._options[key];
     }
 }

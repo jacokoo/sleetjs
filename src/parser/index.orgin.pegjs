@@ -42,7 +42,7 @@ nodes
 
 node
     = p: node_parent c: node_child* {
-        let cc = c.filter(it => it !== p.sibling)
+        let cc = c.filter(it => it && it !== p.sibling)
         if (!p.sibling) cc = flatSibling(cc)
         p.children = cc
         parents.pop()
@@ -61,11 +61,21 @@ node_child
         return node;
     }
     / _? [:>] _+ node: node {
+        node.indent ++
         return node
     }
     / _? '+' _+ node: node {
         parent().sibling = node
+        node.indent ++
         return node
+    }
+    / text: tag_text {
+        const p = parent()
+        if (p.name === '|') {
+            p.text = text
+            return null
+        }
+        return {indent: IDT + 1, name: '|', namespace: text.length === 1 ? 'inline' : null, text}
     }
 
 node_sep
@@ -79,11 +89,7 @@ node_indent
     }
 
 tag
-    = body: tag_body text: tag_text? {
-        body.text = text || [];
-        console.log(body.name, text)
-        return body;
-    }
+    = tag_body
 
 tag_body
     = node_indent? ns: namespace? name: identifier? clazz: tag_class* id: tag_id? clazz2: tag_class* & {
@@ -91,8 +97,8 @@ tag_body
     } attrs: attr_groups? extra: tag_extra? {
         return {indent: IDT, name, namespace: ns, dots: clazz.concat(clazz2), hash: id, attributes: attrs, extra}
     }
-    / '|' attrs: attr_groups? {
-        return {indent: IDT, name: '|', attributes: attrs}
+    / ns: namespace? '|' attrs: attr_groups? {
+        return {indent: IDT, name: '|', namespace: ns, attributes: attrs}
     }
     / '#' {
         return {indent: IDT, name: '#'}
@@ -130,14 +136,12 @@ extra_value = normal_value / compare_value
 tag_text
     = _* '..' & { textIndent = 0; return true} _* eol text: tag_text_lines { return text; }
     / _* '.' & { textIndent = 1; return true} _* eol text: tag_text_lines { return text; }
-    / _ ! ([:>+] _) text: text_to_end { return text; }
+    / _ ! ([:>+] _) text: text_to_end { return [text]; }
 
 tag_text_lines
     = first: ttl rest: (eol l: ttl { return l; })* {
         rest.unshift(first)
-        return rest.reduce(function(acc, item) {
-            return acc.concat({type: 'static', value: '\\n'}).concat(item)
-        })
+        return rest
     }
 
 ttl 'Tag text line'
@@ -167,7 +171,7 @@ plain_text
 	= $(! (eol / '$' / '\\') .)+
 
 dynamic_text
-    = '$' name: dot_identifier ! '(' {
+    = '$' name: identifier_value ! '(' {
         return {type: 'dynamic', name}
     }
     / '$' name: helper? {
@@ -193,10 +197,7 @@ attr_group
 
 attr_lines
     = start: attr_line rest: (_* eol al: attr_line { return al; })* {
-        for (var i = 0; i < rest.length; i ++) {
-            start = start.concat(rest[i]);
-        }
-        return start;
+        return rest.reduce((acc, item) => acc.concat(item), start)
     }
 
 attr_line

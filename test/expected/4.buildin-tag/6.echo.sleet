@@ -1,6 +1,6 @@
-echo(e) + echo(c) + echo(h) + echo(o)
+echo(echo)
 
-a: echo(text)
+a > echo(text)
 p text
     a text
 p

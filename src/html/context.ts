@@ -2,48 +2,71 @@ import { SleetNode, NodeType, CompileResult } from '../ast'
 import { SleetOptions } from '../sleet'
 
 export interface Compiler {
-    compile (context: Context)
+    compile (context: Context): void
 }
 
 export interface CompilerFactory {
+    new (...args: any[]): Compiler
     type: NodeType
     create (node: SleetNode, stack: SleetNode[]): Compiler | undefined
 }
 
 export class Context {
     private _options: SleetOptions
+    private _note: {[name: string]: any}
 
     private _indent: number
+    private _haveIndent: boolean
     private _indentToken: string
     private _newLineToken: string
 
     private _parent?: Context
-    private _children: Context[] = []
-
     private _result: string[] = []
-
     private _factories: {[type: number]: CompilerFactory[]}
 
     constructor (
-        options: SleetOptions, indent: number = -1, indentToken = '    ',
-        newLineToken = '\n', parent?: Context, factories: {[type: number]: CompilerFactory[]} = {}
+        options: SleetOptions, indent: number = -1, indentToken: string,
+        newLineToken = '\n', parent?: Context, factories: {[type: number]: CompilerFactory[]} = {}, note: object = {}
     ) {
         this._options = options
         this._indent = indent
-        this._indentToken = indentToken
+        this._indentToken = indentToken || '    '
         this._newLineToken = newLineToken
 
         this._parent = parent
         this._factories = factories
+        this._note = note
     }
 
-    get options () {
+    get options (): SleetOptions {
         return this._options
     }
 
-    register (factory: CompilerFactory) {
-        if (!this._factories[factory.type]) this._factories[factory.type] = []
-        this._factories[factory.type].unshift(factory)
+    get note (): {[name: string]: any} {
+        return this._note
+    }
+
+    get haveIndent () {
+        return this._haveIndent
+    }
+
+    register (...factory: CompilerFactory[]) {
+        factory.forEach(it => {
+            if (!this._factories[it.type]) this._factories[it.type] = []
+            this._factories[it.type].unshift(it)
+        })
+    }
+
+    remove (factory: CompilerFactory) {
+        if (!this._factories[factory.type]) return
+        this._factories[factory.type] = this._factories[factory.type].filter(it => it !== factory)
+    }
+
+    replace (from: CompilerFactory, to: CompilerFactory) {
+        if (from.type !== to.type || !this._factories[from.type]) return
+        const idx = this._factories[from.type].indexOf(from)
+        if (idx === -1) return
+        this._factories[from.type][idx] = to
     }
 
     create (node: SleetNode, stack: SleetNode[]): Compiler | undefined {
@@ -60,6 +83,12 @@ export class Context {
         return c
     }
 
+    _setHaveIndent (have: boolean) {
+        if (!this._parent) return
+        this._parent._haveIndent = have
+        this._parent._setHaveIndent(have)
+    }
+
     indent (delta = 0) {
         let idt = ''
 
@@ -67,10 +96,15 @@ export class Context {
             idt += this._indentToken;
         }
         this._result.push(idt);
+        this._setHaveIndent(true)
         return this;
     }
 
-    push (text) {
+    mergeUp () {
+        if (this._parent) this._parent._result = this._parent._result.concat(this._result)
+    }
+
+    push (text: string) {
         this._result.push(text);
         return this;
     }
@@ -86,8 +120,26 @@ export class Context {
     }
 
     sub (idt = 0) {
-        const ctx = new Context(this._options, idt + this._indent + 1, this._indentToken, this._newLineToken, this, this._factories)
-        this._children.push(ctx)
-        return ctx;
+        return new Context(
+            this._options, idt + this._indent + 1, this._indentToken,
+            this._newLineToken, this, this._factories, this._note
+        )
+    }
+
+    getOutput () {
+        if (!this._parent) {
+            if (this._result[0] === this._newLineToken) this._result.shift();
+            if (this._result.slice(-1)[0] !== this._newLineToken) this.eol();
+        }
+        return this._result.join('')
+    }
+
+    compile (node: SleetNode, stack: SleetNode[], indent = 0) {
+        const compiler = this.create(node, stack)
+        if (!compiler) return null
+
+        const sub = this.sub(indent)
+        compiler.compile(sub)
+        return sub
     }
 }

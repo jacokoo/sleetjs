@@ -63,11 +63,24 @@ node_child
         return node
     }
     / _? [:>] _+ node: node {
+        node._indent ++
         return node
     }
     / _? '+' _+ node: node {
         parent().sibling = node
+        node._indent ++
         return node
+    }
+    / text: tag_text {
+        const p = parent()
+        if (p.name === '|') {
+            p._setText(text)
+            return p
+        }
+
+        const tag = new ast.Tag(IDT, '|', text.length === 1 ? 'inline' : null, [], null, [], null, location())
+        tag._setText(text)
+        return tag
     }
 
 node_sep
@@ -81,10 +94,7 @@ node_indent
     }
 
 tag
-    = body: tag_body text: tag_text? {
-        body._setText(text)
-        return body
-    }
+    = tag_body
 
 tag_body
     = node_indent? ns: namespace? name: identifier? clazz: tag_class* id: tag_id? clazz2: tag_class* & {
@@ -92,8 +102,8 @@ tag_body
     } attrs: attr_groups? extra: tag_extra? {
         return new ast.Tag(IDT, name, ns, clazz.concat(clazz2), id, attrs, extra, location())
     }
-    / '|' attrs: attr_groups? {
-        return new ast.Tag(IDT, '|', null, [], null, attrs, null, location())
+    / ns: namespace? '|' attrs: attr_groups? {
+        return new ast.Tag(IDT, '|', ns, [], null, attrs, null, location())
     }
     / '#' {
         return new ast.Tag(IDT, '#', null, [], null, [], null, location())
@@ -131,13 +141,12 @@ extra_value = normal_value / compare_value
 tag_text
     = _* '..' & { textIndent = 0; return true} _* eol text: tag_text_lines { return text }
     / _* '.' & { textIndent = 1; return true} _* eol text: tag_text_lines { return text }
-    / _ ! ([:>+] _) text: text_to_end { return text }
+    / _ ! ([:>+] _) text: text_to_end { return [text] }
 
 tag_text_lines
-    = first: ttl rest: (e: (eol { return location()}) l: ttl { return [e, l] })* {
-        return rest.reduce((acc, item) => {
-            return acc.concat(new ast.StaticText('\\n', item[0])).concat(item[1])
-        }, [first])
+    = first: ttl rest: (eol  l: ttl { return l })* {
+        rest.unshift(first)
+        return rest
     }
 
 ttl 'Tag text line'
@@ -154,7 +163,7 @@ ttl 'Tag text line'
     }
     / ws: $(w: _* & eol {return w} ) {
         const sp = ws.slice((IDT + textIndent) * (IDT_TOK || '').length)
-        return new ast.StaticText(sp, location())
+        return [new ast.StaticText(sp, location())]
     }
 
 text_to_end 'Text to end of line'
@@ -169,7 +178,7 @@ plain_text
 	= $(! (eol / '$' / '\\') .)+
 
 dynamic_text
-    = '$' name: dot_identifier ! '(' {
+    = '$' name: identifier_value ! '(' {
         return new ast.DynamicText(name, location())
         return {type: 'dynamic', name}
     }
@@ -196,7 +205,7 @@ attr_group
 
 attr_lines
     = start: attr_line rest: (_* eol al: attr_line { return al })* {
-        return start.concat(rest.reduce((acc, item) => acc.concat(item)))
+        return rest.reduce((acc, item) => acc.concat(item), start)
     }
 
 attr_line
@@ -273,7 +282,7 @@ transformer
 
 string_value = s: quoted_string { return new ast.StringValue(s, location()) }
 number_value = n: number { return new ast.NumberValue(n, location()) }
-boolean_value = b: boolean { return new ast.BoolanValue(b, location()) }
+boolean_value = b: boolean { return new ast.BooleanValue(b, location()) }
 null_value = 'null' { return new ast.NullValue(location()) }
 identifier_value = i: dot_identifier { return new ast.IdentifierValue(i, location()) }
 
