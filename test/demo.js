@@ -1,23 +1,10 @@
 const {compile} = require('../')
 
 const input = `
-# inline comment
-#.
-    this
-    is
+@mixin#demo(name='username' type='text')
+    input(name=$name type=$type)
 
-    a
-    comment
-    block
-
-# inline comment 2
-a
-    #.
-        comment
-        block
-    b
-    c
-        # comment
-
+mixin#demo
+mixin#demo(name='password' type='password')
 `
 console.log(compile(input, {}).code)

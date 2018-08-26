@@ -90,6 +90,7 @@ export class Context {
     }
 
     indent (delta = 0) {
+        if (!this.haveContent()) return this
         let idt = ''
 
         for (let i = 0; i < this._indent + delta; i ++) {
@@ -115,6 +116,7 @@ export class Context {
     }
 
     eol () {
+        if (!this.haveContent()) return this
         this._result.push(this._newLineToken);
         return this;
     }
@@ -126,9 +128,12 @@ export class Context {
         )
     }
 
+    haveContent (): boolean {
+        return (this._parent && this._parent.haveContent()) || this._result.length !== 0
+    }
+
     getOutput () {
         if (!this._parent) {
-            if (this._result[0] === this._newLineToken) this._result.shift();
             if (this._result.slice(-1)[0] !== this._newLineToken) this.eol();
         }
         return this._result.join('')

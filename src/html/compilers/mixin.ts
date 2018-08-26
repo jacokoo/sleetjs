@@ -21,7 +21,7 @@ export class MixinDefineCompiler extends TagCompiler {
             throw new Error('Mixin definition must be placed in top level(the indent of it must be 0)');
         }
 
-        if (context.note.mixin) context.note.mixin = {}
+        if (!context.note.mixin) context.note.mixin = {}
         if (context.note.mixin[this.tag.hash]) {
             throw new Error(`Mixin definition #${this.tag.hash} have already defined`);
         }
@@ -50,7 +50,7 @@ export class MixinDefineCompiler extends TagCompiler {
     }
 }
 
-export class MixinReferenceCompiler extends TagCompiler {
+export class MixinReferenceCompiler extends MixinDefineCompiler {
     static create (node: SleetNode, stack: SleetNode[]): Compiler | undefined {
         if ((node as Tag).name === 'mixin') return new MixinReferenceCompiler(node as Tag, stack)
     }
@@ -69,6 +69,13 @@ export class MixinReferenceCompiler extends TagCompiler {
             const sub = ctx.compile(it, this.stack, -2)
             sub && sub.mergeUp()
         })
-        ctx.getOutput()
+
+        const output = ctx.getOutput()
+        const actual = Object.assign({}, def.replacement, this.replacement(context))
+        const o = Object.keys(actual).reduce((acc, item) => {
+            return acc.replace(new RegExp(`\\$${item}`, 'g'), actual[item])
+        }, output)
+        context.push(o)
     }
+
 }

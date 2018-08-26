@@ -7,6 +7,7 @@ import { CommentCompiler, DoctypeCompiler, IeifCompiler, EchoCompiler } from './
 import { StringValueCompiler, BooleanValueCompiler, NumberValueCompiler, IdentifierValueCompiler } from './compilers/values'
 import { AttributeGroupCompiler, AttributeCompiler } from './compilers/attribute'
 import { IncludeCompiler } from './compilers/include'
+import { MixinDefineCompiler, MixinReferenceCompiler } from './compilers/mixin';
 
 export default {
     compile (input: CompileResult, options: SleetOptions): SleetOutput {
@@ -14,7 +15,8 @@ export default {
         const context = new Context(options, 0, indent, '\n')
         context.register(
             TagCompiler, TextCompiler, EmptyTagCompiler, CommentCompiler,
-            DoctypeCompiler, IeifCompiler, EchoCompiler
+            DoctypeCompiler, IeifCompiler, EchoCompiler,
+            MixinDefineCompiler, MixinReferenceCompiler
         )
 
         context.register(StringValueCompiler, BooleanValueCompiler, NumberValueCompiler, IdentifierValueCompiler)
