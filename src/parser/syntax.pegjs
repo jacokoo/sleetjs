@@ -1,6 +1,6 @@
 {
     const parents = []
-    const ast = options.ast
+    const { ast, ignoreSetting } = options
     const parent = () => parents[parents.length - 1]
     const flatSibling = (nodes) => nodes.reduce((acc, item) => {
         acc.push(item)
@@ -195,12 +195,18 @@ attr_groups
 
 attr_group
     = _* '(' _* attrs: attr_pairs _* ')' settings: attr_settings? {
-        return new ast.AttributeGroup(attrs, settings, location())
+        if (ignoreSetting && settings) {
+            console.log('Warning: Attribute group setting is ignored')
+        }
+        return new ast.AttributeGroup(attrs, ignoreSetting ? null : settings, location())
     }
     / _* '(' eol attrs: attr_lines _* eol indent: $_* & {
         return (indent || '').length === IDT * IDT_TOK.length
     } ')'  settings: attr_settings? {
-        return new ast.AttributeGroup(attrs, settings, location())
+        if (ignoreSetting && settings) {
+            console.log('Warning: Attribute group setting is ignored')
+        }
+        return new ast.AttributeGroup(attrs, ignoreSetting ? null : settings, location())
     }
 
 attr_lines

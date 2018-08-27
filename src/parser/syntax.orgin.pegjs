@@ -3,6 +3,7 @@
         IDT_TOK = null,
         textIndent = 0,
         parents = [],
+        ignoreSetting = options.ignoreSetting,
         parent = () => parents[parents.length - 1],
         flatSibling = (nodes) => nodes.reduce((acc, item) => {
             acc.push(item)
@@ -187,12 +188,18 @@ attr_groups
 
 attr_group
     = _* '(' _* attrs: attr_pairs _* ')' settings: attr_settings? {
-        return {type: 'group', attributes: attrs, settings: settings}
+        if (ignoreSetting && settings) {
+            console.log('Warning: Attribute group setting is ignored')
+        }
+        return {type: 'group', attributes: attrs, settings: ignoreSetting ? null : settings}
     }
     / _* '(' eol attrs: attr_lines _* eol indent: $_* & {
         return (indent || '').length === IDT * IDT_TOK.length;
     } ')'  settings: attr_settings? {
-        return {type: 'group', attributes: attrs, settings: settings}
+        if (ignoreSetting && settings) {
+            console.log('Warning: Attribute group setting is ignored')
+        }
+        return {type: 'group', attributes: attrs, settings: ignoreSetting ? null : settings}
     }
 
 attr_lines

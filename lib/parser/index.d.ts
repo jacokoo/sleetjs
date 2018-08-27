@@ -1,2 +1,2 @@
 import { CompileResult } from '../sleet';
-export declare function parse(input: string): CompileResult;
+export declare function parse(input: string, ignoreSetting?: boolean): CompileResult;

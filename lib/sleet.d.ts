@@ -47,6 +47,7 @@ export interface SleetOptions {
     };
     sourceFile?: string;
     newLineToken?: string;
+    ignoreSetting?: boolean;
     compile?(input: CompileResult, options: SleetOptions): SleetOutput;
 }
 interface StackItem {

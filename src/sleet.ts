@@ -43,6 +43,7 @@ export interface SleetOptions {
     pluginOptions?: {[name: string]: any}
     sourceFile?: string
     newLineToken?: string
+    ignoreSetting?: boolean
     compile? (input: CompileResult, options: SleetOptions): SleetOutput
 }
 
@@ -79,7 +80,7 @@ export class SleetStack {
 }
 
 export function compile(input: string, options: SleetOptions): SleetOutput {
-    const result = parse(input)
+    const result = parse(input, options.ignoreSetting !== false)
     if (options.compile) {
         return options.compile(result, options)
     }
