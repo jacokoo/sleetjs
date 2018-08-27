@@ -21,12 +21,12 @@ export interface Location {
     };
 }
 export interface Compiler {
-    compile(context: Context): void;
+    compile(context: Context, ...others: SleetNode[]): void;
 }
 export interface CompilerFactory {
     type: NodeType;
     new (...args: any[]): Compiler;
-    create(node: SleetNode, stack: SleetNode[]): Compiler | undefined;
+    create(node: SleetNode, stack: SleetStack): Compiler | undefined;
 }
 export interface CompileResult {
     nodes: Tag[];
@@ -48,5 +48,17 @@ export interface SleetOptions {
     sourceFile?: string;
     newLineToken?: string;
     compile?(input: CompileResult, options: SleetOptions): SleetOutput;
+}
+interface StackItem {
+    node: SleetNode;
+    note: {
+        [name: string]: any;
+    };
+}
+export declare class SleetStack {
+    private items;
+    constructor(items?: StackItem[]);
+    last(type?: NodeType): StackItem | undefined;
+    concat(item: SleetNode | SleetNode[]): SleetStack;
 }
 export declare function compile(input: string, options: SleetOptions): SleetOutput;

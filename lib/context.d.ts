@@ -1,5 +1,5 @@
 import { SleetNode } from './ast';
-import { SleetOptions, CompilerFactory, Compiler } from './sleet';
+import { SleetOptions, CompilerFactory, Compiler, SleetStack } from './sleet';
 export declare class Context {
     private _options;
     private _note;
@@ -21,7 +21,7 @@ export declare class Context {
     register(...factory: CompilerFactory[]): void;
     remove(factory: CompilerFactory): void;
     replace(from: CompilerFactory, to: CompilerFactory): void;
-    create(node: SleetNode, stack: SleetNode[]): Compiler | undefined;
+    create(node: SleetNode, stack: SleetStack): Compiler | undefined;
     _setHaveIndent(have: boolean): void;
     indent(delta?: number): this;
     mergeUp(): void;
@@ -31,5 +31,5 @@ export declare class Context {
     sub(idt?: number): Context;
     haveContent(): boolean;
     getOutput(): string;
-    compile(node: SleetNode, stack: SleetNode[], indent?: number): Context | null;
+    compile(node: SleetNode, stack: SleetStack, indent?: number): Context | null;
 }

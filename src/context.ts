@@ -1,5 +1,5 @@
 import { SleetNode } from './ast'
-import { SleetOptions, CompilerFactory, Compiler } from './sleet'
+import { SleetOptions, CompilerFactory, Compiler, SleetStack } from './sleet'
 
 export class Context {
     private _options: SleetOptions
@@ -59,7 +59,7 @@ export class Context {
         this._factories[from.type][idx] = to
     }
 
-    create (node: SleetNode, stack: SleetNode[]): Compiler | undefined {
+    create (node: SleetNode, stack: SleetStack): Compiler | undefined {
         const factory = this._factories[node.type]
         if (!factory) return
         let c: Compiler | undefined
@@ -129,7 +129,7 @@ export class Context {
         return this._result.join('')
     }
 
-    compile (node: SleetNode, stack: SleetNode[], indent = 0) {
+    compile (node: SleetNode, stack: SleetStack, indent = 0) {
         const compiler = this.create(node, stack)
         if (!compiler) return null
 

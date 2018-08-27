@@ -17,13 +17,13 @@ export interface Location {
 }
 
 export interface Compiler {
-    compile (context: Context): void
+    compile (context: Context, ...others: SleetNode[]): void
 }
 
 export interface CompilerFactory {
     type: NodeType
     new (...args: any[]): Compiler
-    create (node: SleetNode, stack: SleetNode[]): Compiler | undefined
+    create (node: SleetNode, stack: SleetStack): Compiler | undefined
 }
 
 export interface CompileResult {
@@ -44,6 +44,38 @@ export interface SleetOptions {
     sourceFile?: string
     newLineToken?: string
     compile? (input: CompileResult, options: SleetOptions): SleetOutput
+}
+
+interface StackItem {
+    node: SleetNode
+    note: {[name: string]: any}
+}
+
+export class SleetStack {
+    private items: StackItem[]
+
+    constructor (items?: StackItem[]) {
+        this.items = items || []
+    }
+
+    last (type?: NodeType): StackItem | undefined {
+        if (!type) return this.items[this.items.length - 1]
+        for (let i = this.items.length - 1; i >= 0; i --) {
+            if (this.items[i].node.type === type) return this.items[i]
+        }
+    }
+
+    concat (item: SleetNode | SleetNode[]) {
+        let its
+        if (Array.isArray(item)) {
+            its = this.items.concat(item.map(it => {
+                return {node: it, note: {}}
+            }))
+        } else {
+            its = this.items.concat({node: item, note: {}})
+        }
+        return new SleetStack(its)
+    }
 }
 
 export function compile(input: string, options: SleetOptions): SleetOutput {
