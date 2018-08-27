@@ -1,6 +1,5 @@
 import { CompileResult } from './ast'
 import { parse } from './parser'
-import html from './html'
 import { Context } from './context'
 
 export interface SleetOutput {
@@ -17,6 +16,7 @@ export interface SleetPlugin {
 export interface SleetOptions {
     plugins?: {[name: string]: SleetPlugin}
     defaultPlugin?: string | SleetPlugin
+    pluginOptions?: {[name: string]: any}
     sourceFile?: string
     newLineToken?: string
     compile? (input: CompileResult, options: SleetOptions): SleetOutput
@@ -38,14 +38,13 @@ export function compile(input: string, options: SleetOptions): SleetOutput {
         name = options.plugins[name]
     }
 
-    if (name && name === 'html') name = html
-
+    if (!name) name = 'html'
     if (name && typeof name === 'string') {
         if (name.slice(0, 6) === 'sleet-') name = name.slice(6)
-        name = require(name)
+        const o = require(name)
+        name = o.plugin
     }
 
-    if (!name) name = html
     const context = new Context(options, 0, result.indent, options.newLineToken || '\n')
     const plugin = name as SleetPlugin
     plugin.prepare(context)

@@ -1,6 +1,0 @@
-@include('../../include/foo.sleet')
-@include('../../include/foo.sleet')
-root#here
-    @include('../../include/foo.sleet')
-    div
-        @include('../../include/foo.sleet')

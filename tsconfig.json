@@ -7,7 +7,7 @@
         "target": "es6",
         "outDir": "lib",
         "noImplicitAny": true,
-        "declaration": false,
+        "declaration": true,
         "moduleResolution": "node"
     }
 }
