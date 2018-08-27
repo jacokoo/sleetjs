@@ -19,7 +19,7 @@ export default {
     output: {
         file: 'dist/sleet.min.js',
         format: 'umd',
-        name: 'sleet',
+        name: 'Sleet',
         sourcemap: true
     }
 }

@@ -1,7 +1,4 @@
-export interface Location {
-    start: {offset: number, line: number, column: number}
-    end: {offset: number, line: number, column: number}
-}
+import { Location } from './sleet'
 
 export enum NodeType {
     Declaration, Tag, TagExtra, AttributeGroup, Attribute, Setting,
@@ -389,10 +386,4 @@ export class Declaration extends NamedNode {
     option (key: string) {
         return this._options[key]
     }
-}
-
-export interface CompileResult {
-    nodes: Tag[]
-    indent: string
-    declaration: Declaration
 }

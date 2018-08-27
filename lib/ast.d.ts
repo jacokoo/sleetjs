@@ -1,15 +1,4 @@
-export interface Location {
-    start: {
-        offset: number;
-        line: number;
-        column: number;
-    };
-    end: {
-        offset: number;
-        line: number;
-        column: number;
-    };
-}
+import { Location } from './sleet';
 export declare enum NodeType {
     Declaration = 0,
     Tag = 1,
@@ -172,10 +161,5 @@ export declare class Declaration extends NamedNode {
     }[], location: Location);
     readonly extension: string;
     option(key: string): string;
-}
-export interface CompileResult {
-    nodes: Tag[];
-    indent: string;
-    declaration: Declaration;
 }
 export {};

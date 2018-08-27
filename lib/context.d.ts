@@ -1,13 +1,5 @@
-import { SleetNode, NodeType } from './ast';
-import { SleetOptions } from './sleet';
-export interface Compiler {
-    compile(context: Context): void;
-}
-export interface CompilerFactory {
-    type: NodeType;
-    new (...args: any[]): Compiler;
-    create(node: SleetNode, stack: SleetNode[]): Compiler | undefined;
-}
+import { SleetNode } from './ast';
+import { SleetOptions, CompilerFactory, Compiler } from './sleet';
 export declare class Context {
     private _options;
     private _note;
