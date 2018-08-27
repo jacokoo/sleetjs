@@ -1,6 +1,6 @@
 import { TagCompiler } from './tag'
-import { SleetNode, Tag, SleetValue, StringValue } from '../../ast'
-import { Compiler, Context } from '../context'
+import { SleetNode, Tag, StringValue } from '../../ast'
+import { Compiler, Context } from '../../context'
 
 export class CommentCompiler extends TagCompiler {
     static create (node: SleetNode, stack: SleetNode[]): Compiler | undefined {
@@ -54,7 +54,7 @@ export class IeifCompiler extends TagCompiler {
     }
 
     openEnd (context: Context) {
-        context.push(this.closeIt ? ']><!-->' : ']>');
+        context.push(this.closeIt ? ']><!-->' : ']>')
     }
 
     attributes (context: Context) {
@@ -69,10 +69,9 @@ export class IeifCompiler extends TagCompiler {
 
     tagClose (context: Context) {
         if (context.haveIndent) context.eol().indent()
-        context.push(this.closeIt ? '<!--<![endif]-->' : '<![endif]-->');
+        context.push(this.closeIt ? '<!--<![endif]-->' : '<![endif]-->')
     }
 }
-
 
 export class EchoCompiler extends TagCompiler {
     static create (node: SleetNode, stack: SleetNode[]): Compiler | undefined {
@@ -86,7 +85,7 @@ export class EchoCompiler extends TagCompiler {
         this.tag.attributeGroups.forEach(it => it.attributes.forEach(attr => attr.values.forEach(v => {
             const stack = this.stack.concat(it, attr)
             const sub = context.compile(v, stack)
-            sub && sub.mergeUp()
+            if (sub) sub.mergeUp()
         })))
     }
 }

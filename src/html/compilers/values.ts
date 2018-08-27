@@ -1,4 +1,4 @@
-import { Compiler, Context } from '../context'
+import { Compiler, Context } from '../../context'
 import { NodeType, SleetNode, SleetValue, StringValue, BooleanValue, NumberValue, IdentifierValue } from '../../ast'
 
 abstract class ValueCompiler<T extends SleetValue<any>> implements Compiler {

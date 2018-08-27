@@ -1,6 +1,6 @@
 import { TagCompiler } from './tag'
 import { SleetNode, Tag } from '../../ast'
-import { Compiler, Context } from '../context'
+import { Compiler, Context } from '../../context'
 
 interface Mixin {
     nodes: SleetNode[]
@@ -14,16 +14,16 @@ export class MixinDefineCompiler extends TagCompiler {
 
     compile (context: Context) {
         if (!this.tag.hash) {
-            throw new Error('Hash property is required for mixin definition. eg. @mixin#name');
+            throw new Error('Hash property is required for mixin definition. eg. @mixin#name')
         }
 
         if (this.tag.indent !== 0) {
-            throw new Error('Mixin definition must be placed in top level(the indent of it must be 0)');
+            throw new Error('Mixin definition must be placed in top level(the indent of it must be 0)')
         }
 
         if (!context.note.mixin) context.note.mixin = {}
         if (context.note.mixin[this.tag.hash]) {
-            throw new Error(`Mixin definition #${this.tag.hash} have already defined`);
+            throw new Error(`Mixin definition #${this.tag.hash} have already defined`)
         }
 
         context.note.mixin[this.tag.hash] = {
@@ -57,17 +57,17 @@ export class MixinReferenceCompiler extends MixinDefineCompiler {
 
     compile (context: Context) {
         if (!this.tag.hash) {
-            throw new Error('Hash property is required for mixin reference. eg. mixin#name');
+            throw new Error('Hash property is required for mixin reference. eg. mixin#name')
         }
 
         if (!context.note.mixin || !context.note.mixin[this.tag.hash]) {
-            throw new Error(`Mixin #${this.tag.hash} is not defined`);
+            throw new Error(`Mixin #${this.tag.hash} is not defined`)
         }
         const def = context.note.mixin[this.tag.hash] as Mixin
         const ctx = context.sub()
         def.nodes.forEach(it => {
             const sub = ctx.compile(it, this.stack, -2)
-            sub && sub.mergeUp()
+            if (sub) sub.mergeUp()
         })
 
         const output = ctx.getOutput()

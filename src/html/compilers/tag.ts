@@ -1,14 +1,14 @@
-import { NodeType, SleetNode, Tag, Attribute, StringValue, Location, AttributeGroup } from '../../ast';
-import { Context, Compiler } from '../context'
+import { NodeType, SleetNode, Tag, Attribute, StringValue, Location, AttributeGroup } from '../../ast'
+import { Context, Compiler } from '../../context'
 
 export class TagCompiler implements Compiler {
-    protected tag: Tag
-    protected stack: SleetNode[]
-
     static type = NodeType.Tag
     static create (node: SleetNode, stack: SleetNode[]): Compiler | undefined {
         return new TagCompiler(node as Tag, stack)
     }
+
+    protected tag: Tag
+    protected stack: SleetNode[]
 
     constructor (node: Tag, stack: SleetNode[]) {
         this.tag = node
@@ -41,7 +41,7 @@ export class TagCompiler implements Compiler {
         const sub = context.sub()
         groups.forEach(it => {
             const compiler = context.create(it, [this.tag])
-            compiler && compiler.compile(sub)
+            if (compiler) compiler.compile(sub)
         })
         sub.mergeUp()
     }
@@ -55,7 +55,7 @@ export class TagCompiler implements Compiler {
 
         this.tag.children.forEach(it => {
             const sub = context.compile(it, this.stack)
-            sub && sub.mergeUp()
+            if (sub) sub.mergeUp()
         })
     }
 

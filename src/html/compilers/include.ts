@@ -3,8 +3,7 @@ import * as path from 'path'
 
 import { TagCompiler } from './tag'
 import { SleetNode, Tag, StringValue, IdentifierValue } from '../../ast'
-import * as ast from '../../ast'
-import { Compiler, Context } from '../context'
+import { Compiler, Context } from '../../context'
 import { parse } from '../../parser'
 
 export class IncludeCompiler extends TagCompiler {
@@ -17,10 +16,10 @@ export class IncludeCompiler extends TagCompiler {
         if (fs.statSync(dir).isFile()) dir = path.dirname(dir)
         const file = path.resolve(dir, this.getPath())
 
-        const {nodes} = parse(fs.readFileSync(file, 'utf-8'), {ast})
+        const {nodes} = parse(fs.readFileSync(file, 'utf-8'))
         nodes.forEach(it => {
             const sub = context.compile(it, this.stack, -1)
-            sub && sub.mergeUp()
+            if (sub) sub.mergeUp()
         })
     }
 
@@ -32,6 +31,7 @@ export class IncludeCompiler extends TagCompiler {
                 if (v instanceof IdentifierValue) return v.value
             }
         }
-        throw new SyntaxError(`no file specified, line: ${this.tag.location.start.line} column: ${this.tag.location.start.column}`)
+        const {line, column} = this.tag.location.start
+        throw new SyntaxError(`no file specified, line: ${line} column: ${column}`)
     }
 }

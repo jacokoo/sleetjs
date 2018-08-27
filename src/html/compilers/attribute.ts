@@ -1,4 +1,4 @@
-import { Compiler, Context } from '../context'
+import { Compiler, Context } from '../../context'
 import { NodeType, SleetNode, AttributeGroup, Attribute } from '../../ast'
 
 export class AttributeGroupCompiler implements Compiler {

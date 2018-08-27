@@ -1,5 +1,5 @@
-import { SleetNode, NodeType, CompileResult } from '../ast'
-import { SleetOptions } from '../sleet'
+import { SleetNode, NodeType } from './ast'
+import { SleetOptions } from './sleet'
 
 export interface Compiler {
     compile (context: Context): void

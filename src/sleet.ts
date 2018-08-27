@@ -1,29 +1,29 @@
 import { CompileResult } from './ast'
-import * as ast from './ast'
-import * as parser from './parser'
+import { parse } from './parser'
 import html from './html'
-
-declare const require: (name: string) => SleetPlugin
+import { Context } from './context'
 
 export interface SleetOutput {
     code: string
-    map?: string
+    mapping?: string
     extension?: string
 }
 
 export interface SleetPlugin {
-    compile (input: CompileResult, options: SleetOptions): SleetOutput
+    prepare (context: Context): void
+    compile (input: CompileResult, options: SleetOptions, context: Context): SleetOutput
 }
 
 export interface SleetOptions {
-    compile? (input: CompileResult, options: SleetOptions): SleetOutput
     plugins?: {[name: string]: SleetPlugin}
     defaultPlugin?: string | SleetPlugin
     sourceFile?: string
+    newLineToken?: string
+    compile? (input: CompileResult, options: SleetOptions): SleetOutput
 }
 
 export function compile(input: string, options: SleetOptions): SleetOutput {
-    const result = parser.parse(input, {ast}) as CompileResult
+    const result = parse(input)
     if (options.compile) {
         return options.compile(result, options)
     }
@@ -46,5 +46,8 @@ export function compile(input: string, options: SleetOptions): SleetOutput {
     }
 
     if (!name) name = html
-    return (name as SleetPlugin).compile(result, options)
+    const context = new Context(options, 0, result.indent, options.newLineToken || '\n')
+    const plugin = name as SleetPlugin
+    plugin.prepare(context)
+    return plugin.compile(result, options, context)
 }

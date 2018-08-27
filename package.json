@@ -27,8 +27,9 @@
   },
   "scripts": {
     "test": "mocha --ui bdd test/",
-    "peg": "mkdir -p lib/parser && pegjs -o lib/parser/index.js src/parser/index.pegjs",
+    "peg": "pegjs -o lib/parser/syntax.js src/parser/syntax.pegjs",
     "ts": "tslint src/**/*.ts && tsc",
-    "build": "npm-run-all --parallel peg ts"
+    "clean": "rm -rf lib",
+    "build": "npm-run-all clean ts peg test"
   }
 }

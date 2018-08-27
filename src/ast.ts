@@ -273,7 +273,7 @@ export class AttributeGroup extends SleetNode {
         let idx = 0
 
         while (idx < target.length) {
-            let current = target
+            const current = target
             target = []
             current.forEach((it, i) => {
                 if (idx >= i) target.push(it)
@@ -383,11 +383,11 @@ export class Declaration extends NamedNode {
     }
 
     get extension () {
-        return this._extension;
+        return this._extension
     }
 
     option (key: string) {
-        return this._options[key];
+        return this._options[key]
     }
 }
 

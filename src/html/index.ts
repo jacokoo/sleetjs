@@ -1,6 +1,6 @@
 import { SleetPlugin, SleetOptions, SleetOutput } from '../sleet'
 import { CompileResult } from '../ast'
-import { Context } from './context'
+import { Context } from '../context'
 import { TagCompiler, EmptyTagCompiler } from './compilers/tag'
 import { TextCompiler } from './compilers/text'
 import { CommentCompiler, DoctypeCompiler, IeifCompiler, EchoCompiler } from './compilers/other-tags'
@@ -12,9 +12,7 @@ import { IncludeCompiler } from './compilers/include'
 import { MixinDefineCompiler, MixinReferenceCompiler } from './compilers/mixin'
 
 export default {
-    compile (input: CompileResult, options: SleetOptions): SleetOutput {
-        const {nodes, indent, declaration} = input
-        const context = new Context(options, 0, indent, '\n')
+    prepare (context: Context) {
         context.register(
             TagCompiler, TextCompiler, EmptyTagCompiler, CommentCompiler,
             DoctypeCompiler, IeifCompiler, EchoCompiler,
@@ -24,6 +22,9 @@ export default {
         context.register(StringValueCompiler, BooleanValueCompiler, NumberValueCompiler, IdentifierValueCompiler)
         context.register(AttributeGroupCompiler, AttributeCompiler)
         context.register(IncludeCompiler)
+    },
+    compile (input: CompileResult, options: SleetOptions, context: Context): SleetOutput {
+        const {nodes, declaration} = input
 
         nodes.forEach(it => {
             const sub = context.compile(it, [], -1)

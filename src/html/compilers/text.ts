@@ -1,16 +1,16 @@
-import { Compiler, Context } from '../context'
-import { NodeType, SleetNode, Tag, SleetValue, SleetText, StaticText, IdentifierValue } from '../../ast'
+import { Compiler, Context } from '../../context'
+import { NodeType, SleetNode, Tag } from '../../ast'
 
 const map: {[name: string]: string} = {
     '&': '&amp;',
     '<': '&lt;',
     '>': '&gt;',
     '"': '&quot;',
-    "'": '&#39;',
+    '\'': '&#39;',
     '/': '&#x2F;',
     '`': '&#x60;',
     '=': '&#x3D;'
-};
+}
 
 const escapeHtml = (string: string) => string.replace(/[&<>"'`=\/]/g, s => map[s])
 
@@ -30,9 +30,9 @@ export class TextCompiler implements Compiler {
     compile (context: Context) {
         if (!this.tag.text.length) return
 
-        let escape = this.escape()
-
+        const escape = this.escape()
         const lines = this.tag.text.filter(it => !!it.length)
+
         if (!this.inline()) context.eol()
         lines.forEach(line => {
             if (!line.some(it => !!it.toHTMLString().length)) {
@@ -46,8 +46,8 @@ export class TextCompiler implements Compiler {
                 context.push(escape ? escapeHtml(text) : text)
             })
             context.eol()
-        });
-        context.pop();
+        })
+        context.pop()
     }
 
     escape () {
