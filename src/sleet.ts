@@ -20,6 +20,18 @@ export interface Compiler {
     compile (context: Context, ...others: SleetNode[]): void
 }
 
+export abstract class AbstractCompiler<T extends SleetNode> implements Compiler {
+    protected node: T
+    protected stack: SleetStack
+
+    constructor(node: T, stack: SleetStack) {
+        this.node = node
+        this.stack = stack.concat(node)
+    }
+
+    abstract compile (context: Context, ...others: SleetNode[]): void
+}
+
 export interface CompilerFactory {
     type: NodeType
     new (...args: any[]): Compiler
@@ -29,7 +41,7 @@ export interface CompilerFactory {
 export interface CompileResult {
     nodes: Tag[]
     indent: string
-    declaration: Declaration
+    declaration?: Declaration
 }
 
 export interface SleetPlugin {
@@ -91,14 +103,14 @@ export function compile(input: string, options: SleetOptions): SleetOutput {
     }
 
     if (!name && options.defaultPlugin) name = options.defaultPlugin
-    if (name && typeof name === 'string' && options.plugins && options.plugins[name]) {
-        name = options.plugins[name]
+    if (name && typeof name === 'string') {
+        if (name.slice(0, 6) === 'sleet-') name = name.slice(6)
+        if (options.plugins && options.plugins[name]) name = options.plugins[name]
     }
 
     if (!name) name = 'html'
     if (name && typeof name === 'string') {
-        if (name.slice(0, 6) === 'sleet-') name = name.slice(6)
-        const o = require(name)
+        const o = require(`sleet-${name}`)
         name = o.plugin
     }
 
