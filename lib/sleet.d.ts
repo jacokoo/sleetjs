@@ -6,7 +6,7 @@ export interface SleetOutput {
     extension?: string;
 }
 export interface SleetPlugin {
-    prepare(context: Context): void;
+    prepare?(context: Context): void;
     compile(input: CompileResult, options: SleetOptions, context: Context): SleetOutput;
 }
 export interface SleetOptions {

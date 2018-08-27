@@ -9,7 +9,7 @@ export interface SleetOutput {
 }
 
 export interface SleetPlugin {
-    prepare (context: Context): void
+    prepare? (context: Context): void
     compile (input: CompileResult, options: SleetOptions, context: Context): SleetOutput
 }
 
@@ -47,6 +47,6 @@ export function compile(input: string, options: SleetOptions): SleetOutput {
 
     const context = new Context(options, 0, result.indent, options.newLineToken || '\n')
     const plugin = name as SleetPlugin
-    plugin.prepare(context)
+    if (plugin.prepare) plugin.prepare(context)
     return plugin.compile(result, options, context)
 }
