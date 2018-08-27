@@ -6,8 +6,8 @@ export interface Compiler {
 }
 
 export interface CompilerFactory {
-    new (...args: any[]): Compiler
     type: NodeType
+    new (...args: any[]): Compiler
     create (node: SleetNode, stack: SleetNode[]): Compiler | undefined
 }
 
@@ -72,7 +72,7 @@ export class Context {
     create (node: SleetNode, stack: SleetNode[]): Compiler | undefined {
         const factory = this._factories[node.type]
         if (!factory) return
-        let c: Compiler | undefined = undefined
+        let c: Compiler | undefined
         let idx = 0
 
         while (!c && idx < factory.length) {
@@ -94,11 +94,11 @@ export class Context {
         let idt = ''
 
         for (let i = 0; i < this._indent + delta; i ++) {
-            idt += this._indentToken;
+            idt += this._indentToken
         }
-        this._result.push(idt);
+        this._result.push(idt)
         this._setHaveIndent(true)
-        return this;
+        return this
     }
 
     mergeUp () {
@@ -106,19 +106,19 @@ export class Context {
     }
 
     push (text: string) {
-        this._result.push(text);
-        return this;
+        this._result.push(text)
+        return this
     }
 
     pop () {
-        this._result.pop();
-        return this;
+        this._result.pop()
+        return this
     }
 
     eol () {
         if (!this.haveContent()) return this
-        this._result.push(this._newLineToken);
-        return this;
+        this._result.push(this._newLineToken)
+        return this
     }
 
     sub (idt = 0) {
@@ -134,7 +134,7 @@ export class Context {
 
     getOutput () {
         if (!this._parent) {
-            if (this._result.slice(-1)[0] !== this._newLineToken) this.eol();
+            if (this._result.slice(-1)[0] !== this._newLineToken) this.eol()
         }
         return this._result.join('')
     }
