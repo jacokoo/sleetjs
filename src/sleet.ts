@@ -66,9 +66,11 @@ interface StackItem {
 
 export class SleetStack {
     private items: StackItem[]
+    private _notes: {[name: string]: any}
 
-    constructor (items?: StackItem[]) {
+    constructor (items?: StackItem[], notes: {[name: string]: any} = {}) {
         this.items = items || []
+        this._notes = notes
     }
 
     last (type?: NodeType): StackItem | undefined {
@@ -87,7 +89,11 @@ export class SleetStack {
         } else {
             its = this.items.concat({node: item, note: {}})
         }
-        return new SleetStack(its)
+        return new SleetStack(its, this._notes)
+    }
+
+    note (key: string): any {
+        return this._notes[key]
     }
 }
 

@@ -64,8 +64,12 @@ interface StackItem {
 }
 export declare class SleetStack {
     private items;
-    constructor(items?: StackItem[]);
+    private _notes;
+    constructor(items?: StackItem[], notes?: {
+        [name: string]: any;
+    });
     last(type?: NodeType): StackItem | undefined;
     concat(item: SleetNode | SleetNode[]): SleetStack;
+    note(key: string): any;
 }
 export declare function compile(input: string, options: SleetOptions): SleetOutput;
