@@ -32,4 +32,5 @@ export declare class Context {
     haveContent(): boolean;
     getOutput(): string;
     compile(node: SleetNode, stack: SleetStack, indent?: number): Context | null;
+    compileUp(node: SleetNode, stack: SleetStack, indent?: number): Context | null;
 }

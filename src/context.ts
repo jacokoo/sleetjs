@@ -137,4 +137,10 @@ export class Context {
         compiler.compile(sub)
         return sub
     }
+
+    compileUp (node: SleetNode, stack: SleetStack, indent = 0) {
+        const c = this.compile(node, stack, indent)
+        if (c) c.mergeUp()
+        return c
+    }
 }
