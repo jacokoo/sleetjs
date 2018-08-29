@@ -95,8 +95,8 @@ export class Context {
         if (this._parent) this._parent._result = this._parent._result.concat(this._result)
     }
 
-    push (text: string) {
-        this._result.push(text)
+    push (...text: string[]) {
+        text.forEach(it => this._result.push(it))
         return this
     }
 

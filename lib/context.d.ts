@@ -25,7 +25,7 @@ export declare class Context {
     _setHaveIndent(have: boolean): void;
     indent(delta?: number): this;
     mergeUp(): void;
-    push(text: string): this;
+    push(...text: string[]): this;
     pop(): this;
     eol(): this;
     sub(idt?: number): Context;
