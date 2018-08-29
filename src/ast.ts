@@ -123,20 +123,28 @@ export class Transformer extends NamedNode {
     }
 }
 
-export class TransformValue extends SleetValue<NormalValue> {
-    private _transformers: (Transformer | NormalValue)[]
+export class TransformValue extends SleetValue<string> {
+    private _transformers: (Transformer | string)[]
+    private _end?: NormalValue
 
-    constructor(value: NormalValue, transformers: (Transformer | NormalValue)[], location: Location) {
+    constructor(value: string, transformers: (Transformer | string)[], end: NormalValue, location: Location) {
         super(value, NodeType.TransformValue, location)
         this._transformers = transformers || []
+        this._end = end
     }
 
     get transformers () {
         return this._transformers
     }
 
+    get end () {
+        return this._end
+    }
+
     toHTMLString () {
-        return `${this._value.toHTMLString()}${this._transformers.map(it => ` | ` + it.toHTMLString()).join('')}`
+        return this._value + this._transformers.map(it => {
+            return ` | ` + (typeof it === 'string' ? it : it.toHTMLString())
+        }).join('')
     }
 }
 

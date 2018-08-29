@@ -218,7 +218,7 @@ attr_line
     }
 
 attr_pairs
-    = start: attr_pair rest: (_* ','? _* pair: attr_pair { return pair; })* {
+    = start: attr_pair rest: (c: $(_* ','? _*) & {return c.length > 0} pair: attr_pair { return pair; })* {
         return rest.unshift(start) && rest;
     }
 
@@ -254,7 +254,7 @@ helper
     }
 
 helper_attrs
-    = start: helper_attr rest: (_* ','? _* v: helper_attr {return v} )* {
+    = start: helper_attr rest: (c: $(_* ','? _*) & {return c.length > 0} v: helper_attr {return v} )* {
         rest.unshift(start)
         return rest
     }
@@ -269,14 +269,22 @@ helper_attr
 
 
 transform
-    = value: normal_value ts: (_* '|' _* c: (transformer / normal_value) { return c })+ {
-    	return {type: 'transform', value, transformers: ts}
+    = value: identifier_value ts: (_* '|' _* c: transformer { return c })* end: transform_end? & { return ts.length || end } {
+    	return {type: 'transform', value, transformers: ts, end}
     }
 
 transformer
     = name: identifier '(' _* first: normal_value rest: (_* v: normal_value {return v})* _* ')' {
         rest.unshift(first)
         return {type: 'transformer', name, values: rest}
+    }
+    / i: identifier & (_ / ')') {
+        return i
+    }
+
+transform_end
+    = _* '|' _* c: normal_value {
+        return c
     }
 
 string_value = s: quoted_string { return {type: 'quoted', value: s} }
@@ -295,7 +303,16 @@ blank_line 'Blank line'
     = _* eol
 
 dot_identifier 'Identifier'
-    = $(identifier ('.' identifier)*)
+    = i: identifier c: dot_token* {
+        c.unshift(i)
+        return c.join('')
+    }
+
+dot_token
+    = $('.' identifier)
+    / '[' ii: (c: quoted_string { return c } / identifier ) ']' {
+        return `[${ii}]`
+    }
 
 identifier 'Identifier'
     = start: [a-zA-Z$@_] rest: $[a-zA-Z0-9$_-]* {

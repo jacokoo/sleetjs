@@ -68,10 +68,12 @@ export declare class Transformer extends NamedNode {
     readonly params: NormalValue[];
     toHTMLString(): string;
 }
-export declare class TransformValue extends SleetValue<NormalValue> {
+export declare class TransformValue extends SleetValue<string> {
     private _transformers;
-    constructor(value: NormalValue, transformers: (Transformer | NormalValue)[], location: Location);
-    readonly transformers: (StringValue | BooleanValue | NumberValue | NullValue | IdentifierValue | Transformer)[];
+    private _end?;
+    constructor(value: string, transformers: (Transformer | string)[], end: NormalValue, location: Location);
+    readonly transformers: (string | Transformer)[];
+    readonly end: StringValue | BooleanValue | NumberValue | NullValue | IdentifierValue | undefined;
     toHTMLString(): string;
 }
 export declare type HelperValue = NormalValue | CompareOperatorValue | TransformValue;
