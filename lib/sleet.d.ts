@@ -21,13 +21,13 @@ export interface Location {
     };
 }
 export interface Compiler {
-    compile(context: Context, ...others: SleetNode[]): void;
+    compile(context: Context, ...others: SleetNode[]): any;
 }
 export declare abstract class AbstractCompiler<T extends SleetNode> implements Compiler {
     protected node: T;
     protected stack: SleetStack;
     constructor(node: T, stack: SleetStack);
-    abstract compile(context: Context, ...others: SleetNode[]): void;
+    abstract compile(context: Context, ...others: SleetNode[]): any;
 }
 export interface CompilerFactory {
     type: NodeType;

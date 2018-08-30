@@ -17,7 +17,7 @@ export interface Location {
 }
 
 export interface Compiler {
-    compile (context: Context, ...others: SleetNode[]): void
+    compile (context: Context, ...others: SleetNode[]): any
 }
 
 export abstract class AbstractCompiler<T extends SleetNode> implements Compiler {
@@ -29,7 +29,7 @@ export abstract class AbstractCompiler<T extends SleetNode> implements Compiler 
         this.stack = stack.concat(node)
     }
 
-    abstract compile (context: Context, ...others: SleetNode[]): void
+    abstract compile (context: Context, ...others: SleetNode[]): any
 }
 
 export interface CompilerFactory {
