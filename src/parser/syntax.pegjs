@@ -277,7 +277,7 @@ helper_attr
 
 transform
     = value: identifier_value ts: (_* '|' _* c: transformer { return c })* end: transform_end? & { return ts.length || end } {
-        return new ast.TransformValue(value, ts, end, location())
+        return new ast.TransformValue(value.value, ts, end, location())
     }
 
 transformer
@@ -325,7 +325,7 @@ dot_identifier 'Identifier'
 dot_token
     = $('.' identifier)
     / '[' ii: (c: quoted_string { return c } / identifier ) ']' {
-        return `[${ii}]`
+        return `[${ii.replace(/\]/g, '\\]')}]`
     }
 
 identifier 'Identifier'

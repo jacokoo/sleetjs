@@ -311,7 +311,7 @@ dot_identifier 'Identifier'
 dot_token
     = $('.' identifier)
     / '[' ii: (c: quoted_string { return c } / identifier ) ']' {
-        return `[${ii}]`
+        return `[${ii.replace(/\]/g, '\\]')}]`
     }
 
 identifier 'Identifier'
