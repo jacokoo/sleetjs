@@ -164,7 +164,7 @@ text_to_end 'Text to end of line'
     = (static_text / dynamic_text)+
 
 static_text
-	= t: (plain_text / '\\$' c: plain_text { return '$' + c } / '\\' c: plain_text { return text() }) {
+	= t: ('\\\\' / plain_text / '\\$' c: plain_text { return '$' + c } / '\\' c: plain_text { return text() }) {
     	return {type: 'static', value: t}
     }
 

@@ -170,7 +170,7 @@ text_to_end 'Text to end of line'
     = (static_text / dynamic_text)+
 
 static_text
-	= t: (plain_text / '\\$' c: plain_text { return '$' + c } / '\\' c: plain_text { return text() }) {
+	= t: ('\\\\' / plain_text / '\\$' c: plain_text { return '$' + c } / '\\' c: plain_text { return text() }) {
         return new ast.StaticText(t, location())
     }
 
@@ -183,7 +183,7 @@ dynamic_text
         return {type: 'dynamic', name}
     }
     / '$' name: helper? {
-        if (!name) new ast.StaticText('$', location())
+        if (!name) return new ast.StaticText('$', location())
         return new ast.DynamicText(name, location())
     }
 
