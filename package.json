@@ -34,10 +34,11 @@
   },
   "scripts": {
     "peg": "pegjs -o lib/parser/syntax.js src/parser/syntax.pegjs",
+    "peg-src": "pegjs -o src/parser/syntax.js src/parser/syntax.pegjs",
     "ts": "tslint src/**/*.ts && tsc",
     "dist": "rollup -c",
     "clean": "rm -rf lib dist",
     "lib": "npm-run-all ts peg",
-    "build": "npm-run-all clean lib dist"
+    "build": "npm-run-all clean lib peg-src dist"
   }
 }
